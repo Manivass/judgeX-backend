@@ -1,7 +1,14 @@
 const express = require("express");
 const connectionDB = require("./auth/database.js");
+const user = require("./routes/user.js");
+const cookieParser = require("cookie-parser");
+
 require("dotenv").config();
 const app = express();
+
+app.use("/", express.json());
+app.use("/", cookieParser());
+app.use("/", user);
 
 connectionDB()
   .then(() => {
