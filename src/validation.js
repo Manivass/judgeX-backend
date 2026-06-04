@@ -7,7 +7,7 @@ const validateSignUp = async ({ firstName, lastName, email, password }) => {
     throw new Error("pls fill all the credentails");
   }
 
-  if (firstName.length < 3 || firstName.length > 8) {
+  if (firstName.length < 3 || firstName.length > 18) {
     throw new Error("firstname must be in 3 to 8 characters");
   }
 
