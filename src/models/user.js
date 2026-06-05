@@ -44,15 +44,13 @@ const userSchema = new mongoose.Schema(
         values: ["user", "admin"],
         message: `{VALUE} is not a valid role`,
       },
+      trim: true,
     },
   },
   {
     timestamps: true,
   },
 );
-userSchema.pre("save", async function () {
-  this.password = await bcrypt.hash(this.password, 10);
-});
 
 userSchema.methods.comparePasswordAndHash = async function (password) {
   const isPasswordValid = await bcrypt.compare(password, this.password);

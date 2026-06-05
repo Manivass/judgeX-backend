@@ -1,6 +1,6 @@
 const validate = require("validator");
 const User = require("./models/user");
-
+const { dataStructreTypes } = require("./constant");
 
 const validateSignUp = async ({ firstName, lastName, email, password }) => {
   if (!firstName || !lastName || !email || !password) {
@@ -29,4 +29,63 @@ const validateSignUp = async ({ firstName, lastName, email, password }) => {
   }
 };
 
-module.exports = { validateSignUp };
+const validateQuestion = (
+  title,
+  description,
+  difficulty,
+  examples,
+  inputTestCases,
+  outputTestCases,
+  timeLimit,
+  memoryLimit,
+  constraintsText,
+  dataStructure,
+  explanation,
+) => {
+  if (
+    !title ||
+    !description ||
+    !difficulty ||
+    !examples ||
+    !inputTestCases ||
+    !outputTestCases ||
+    !timeLimit ||
+    !memoryLimit ||
+    !constraintsText ||
+    !dataStructure
+  ) {
+    throw new Error("pls fill all the credentials");
+  }
+
+  if (title.length > 40) {
+    throw new Error("upto 40 characters are allowed for title");
+  }
+
+  if (description.length > 500) {
+    throw new Error("only 500 characters are allowed for description");
+  }
+
+  if (!["easy", "medium", "hard"].includes(difficulty)) {
+    throw new Error(
+      "difficulty status is not valid . only easy , medium and hard allowed",
+    );
+  }
+
+  if (examples.input.length !== examples.output.length) {
+    throw new Error("give proper example with  input and output");
+  }
+
+  if (inputTestCases.length !== outputTestCases.length) {
+    throw new Error("give proper testcases with  input and output");
+  }
+
+  if (constraintsText.length > 10) {
+    throw new Error("only 10 constraints are allowed");
+  }
+
+  if (!dataStructreTypes.includes(dataStructure)) {
+    throw new Error("data structure type is not valid");
+  }
+};
+
+module.exports = { validateSignUp, validateQuestion };

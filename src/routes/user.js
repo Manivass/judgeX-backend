@@ -39,8 +39,9 @@ user.post("/login", async (req, res) => {
 
 user.post("/signup", async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    let { firstName, lastName, email, password } = req.body;
     await validateSignUp({ firstName, lastName, email, password });
+    password = await bcrypt.hash(password, 10);
 
     const newUser = new User({ firstName, lastName, email, password });
     await newUser.save();
@@ -63,6 +64,18 @@ user.post("/logout", async (req, res) => {
     res.status(200).json({ success: true, messagae: "logout successfully" });
   } catch (err) {
     res.status(500).json({ success: false, messagae: err.messagae });
+  }
+});
+
+user.post("/profile", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    let edited = req.body;
+    Object.keys(edited).forEach((val) => (loggedUser[val] = edited[val]));
+    await loggedUser.save();
+    res.status(200).json({ success: true, messagae: loggedUser });
+  } catch (err) {
+    res.status(400).json({ success: false, messagae: err.message });
   }
 });
 
