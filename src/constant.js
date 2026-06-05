@@ -1,0 +1,25 @@
+const dataStructreTypes = [
+  "Array",
+  "String ",
+  "Linked List",
+  "Stack",
+  "Queue",
+  "Tree",
+  "Binary Tree",
+  "BST",
+  "Graph",
+  "Heap",
+  "Trie",
+  "HashMap",
+  "Sliding Window",
+  "Two Pointer",
+  "Greedy",
+  "Backtracking",
+  "Recursion",
+  "Dynamic Programming",
+  "Binary Search",
+  "Prefix Sum",
+  "Bit Manipulation",
+];
+
+module.exports = { dataStructreTypes };

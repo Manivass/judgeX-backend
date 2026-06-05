@@ -38,6 +38,13 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    role: {
+      type: String,
+      enum: {
+        values: ["user", "admin"],
+        message: `{VALUE} is not a valid role`,
+      },
+    },
   },
   {
     timestamps: true,
@@ -53,7 +60,7 @@ userSchema.methods.comparePasswordAndHash = async function (password) {
 };
 
 userSchema.methods.getJWT = async function () {
-  const token =  jwt.sign({ email: this.email }, process.env.JWTKEY, {
+  const token = jwt.sign({ email: this.email }, process.env.JWTKEY, {
     expiresIn: "1d",
   });
 
