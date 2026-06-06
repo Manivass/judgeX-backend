@@ -87,5 +87,57 @@ const validateQuestion = (
     throw new Error("data structure type is not valid");
   }
 };
+const editValidateQuestion = ({
+  title,
+  description,
+  difficulty,
+  examples,
+  inputTestCases,
+  outputTestCases,
+  timeLimit,
+  memoryLimit,
+  constraintsText,
+  dataStructure,
+  explanation,
+}) => {
+  if (title && title.length > 40) {
+    throw new Error("upto 40 characters are allowed for title");
+  }
 
-module.exports = { validateSignUp, validateQuestion };
+  if (description && description.length > 500) {
+    throw new Error("only 500 characters are allowed for description");
+  }
+
+  if (difficulty && !["easy", "medium", "hard"].includes(difficulty)) {
+    throw new Error(
+      "difficulty status is not valid . only easy , medium and hard allowed",
+    );
+  }
+
+  if (
+    examples &&
+    examples.input &&
+    examples.output &&
+    examples.input.length !== examples.output.length
+  ) {
+    throw new Error("give proper example with  input and output");
+  }
+
+  if (
+    inputTestCases &&
+    outputTestCases &&
+    inputTestCases.length !== outputTestCases.length
+  ) {
+    throw new Error("give proper testcases with  input and output");
+  }
+
+  if (constraintsText && constraintsText.length > 10) {
+    throw new Error("only 10 constraints are allowed");
+  }
+
+  if (dataStructure && !dataStructreTypes.includes(dataStructure)) {
+    throw new Error("data structure type is not valid");
+  }
+};
+
+module.exports = { validateSignUp, validateQuestion, editValidateQuestion };
