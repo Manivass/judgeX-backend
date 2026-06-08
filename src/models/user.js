@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validate = require("validator");
+const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -22,8 +22,9 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      lowercase: true,
       validate: function (value) {
-        if (!validate.isEmail(value)) {
+        if (!validator.isEmail(value)) {
           throw new Error("email id is not valid");
         }
       },
@@ -33,8 +34,45 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: false,
       validate: function (value) {
-        if (!validate.isStrongPassword(value)) {
+        if (!validator.isStrongPassword(value)) {
           throw new Error("Password is not strong");
+        }
+      },
+    },
+    profilePicture: {
+      type: String,
+      required: true,
+      default: "https://cdn-icons-png.flaticon.com/512/9131/9131529.png",
+      validate: function (value) {
+        if (!validator.isURL(value)) {
+          throw new Error("profile picture URL is not valid");
+        }
+      },
+    },
+    bio: {
+      type: String,
+      validate: function (value) {
+        if (value && value.length > 300) {
+          throw new Error("bio must have less than 300 characters");
+        }
+      },
+    },
+    college: {
+      type: String,
+    },
+    githubURL: {
+      type: String,
+      validate: function (value) {
+        if (!validator.isURL(value)) {
+          throw new Error("github URL is not valid");
+        }
+      },
+    },
+    linkedinURL: {
+      type: String,
+      validate: function (value) {
+        if (!validator.isURL(value)) {
+          throw new Error("linkedin URL is not valid");
         }
       },
     },
@@ -45,12 +83,76 @@ const userSchema = new mongoose.Schema(
         message: `{VALUE} is not a valid role`,
       },
       trim: true,
-    },
-    problemSolved: {
       required: true,
-      easy: Number,
-      meduim: Number,
-      hard: Number,
+      default: "user",
+    },
+    solvedProblems: {
+      easy: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      medium: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      hard: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+    },
+    attemptedProblems: {
+      easy: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      medium: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      hard: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+    },
+    totalSubmissions: {
+      easy: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      medium: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      hard: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+    },
+    acceptedSubmissions: {
+      easy: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      medium: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      hard: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
     },
   },
   {
@@ -64,7 +166,7 @@ userSchema.methods.comparePasswordAndHash = async function (password) {
 };
 
 userSchema.methods.getJWT = async function () {
-  const token = jwt.sign({ email: this.email }, process.env.JWTKEY, {
+  const token = jwt.sign({ _id: this._id }, process.env.JWTKEY, {
     expiresIn: "1d",
   });
 
