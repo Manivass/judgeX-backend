@@ -1,4 +1,8 @@
 const express = require("express");
+const userAuth = require("../middleware/userAuth");
+const Question = require("../models/questions");
+const Submission = require("../models/submission");
+const { validateSubmissionCode } = require("../validation");
 
 const code = express.code();
 
@@ -69,6 +73,50 @@ code.post("/run", async (req, res) => {
       success: false,
       message: "execution failed",
     });
+  }
+});
+
+code.post("/codesubmission", userAuth, async (req, res) => {
+  try {
+    const loggeduser = req.user;
+    const {
+      userId,
+      problemId,
+      sourceCode,
+      language,
+      verdict,
+      executionTime,
+      memory,
+    } = req.body;
+
+    const isProblemAvailable = await Question.findById(problemId);
+    if (!isProblemAvailable) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no question found" });
+    }
+
+    validateSubmissionCode(
+      sourceCode,
+      language,
+      verdict,
+      executionTime,
+      memory,
+    );
+
+    const newSubmission = new Submission({
+      userId: loggeduser._id,
+      problemId: isProblemAvailable._id,
+      sourceCode,
+      language,
+      verdict,
+      executionTime,
+      memory,
+    });
+    await newSubmission.save();
+    res.status(201).json({ success: true, message: "successfully saved..." });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 

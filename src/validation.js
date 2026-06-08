@@ -140,4 +140,47 @@ const editValidateQuestion = ({
   }
 };
 
-module.exports = { validateSignUp, validateQuestion, editValidateQuestion };
+const validateSubmissionCode = async (
+  sourceCode,
+  language,
+  verdict,
+  executionTime,
+  memory,
+) => {
+  if (
+    !sourceCode ||
+    !language ||
+    !verdict ||
+    executionTime == null ||
+    memory == null
+  ) {
+    throw new Error("pls fill all the credentials");
+  }
+
+  if (!["javascript", "c++", "java", "python"].includes(language)) {
+    throw new Error("pls select a valid language");
+  }
+
+  if (
+    ![
+      "Accepted",
+      "Wrong Answer",
+      "Runtime Error",
+      "Compilation Error",
+      "Time Limit Exceeded",
+    ].includes(verdict)
+  ) {
+    throw new Error("pls enter a valid verdict");
+  }
+
+  if (sourceCode.length > 10000) {
+    throw new Error("code is too large");
+  }
+};
+
+module.exports = {
+  validateSignUp,
+  validateQuestion,
+  editValidateQuestion,
+  validateSubmissionCode,
+};
