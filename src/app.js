@@ -2,6 +2,8 @@ const express = require("express");
 const connectionDB = require("./auth/database.js");
 const user = require("./routes/user.js");
 const cookieParser = require("cookie-parser");
+const code = require("./routes/code.js");
+const questions = require("./routes/questions.js");
 
 require("dotenv").config();
 const app = express();
@@ -9,6 +11,8 @@ const app = express();
 app.use("/", express.json());
 app.use("/", cookieParser());
 app.use("/", user);
+app.use("/", code);
+app.use("/", questions);
 
 connectionDB()
   .then(() => {

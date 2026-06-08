@@ -22,24 +22,27 @@ const questionsSchema = new mongoose.Schema(
       },
       required: true,
     },
-    examples: {
-      input: {
-        type: [String],
-        required: true,
+    testcase: [
+      {
+        input: {
+          type: String,
+          required: true,
+        },
+        output: {
+          type: String,
+          required: true,
+        },
+        ishidden: {
+          type: Boolean,
+          required: true,
+          enum: {
+            values: [true, false],
+            message: `{VALUE} is not valid`,
+          },
+          default: false,
+        },
       },
-      output: {
-        type: [String],
-        required: true,
-      },
-    },
-    inputTestCases: {
-      type: [String],
-      required: true,
-    },
-    outputTestCases: {
-      type: [String],
-      required: true,
-    },
+    ],
     timeLimit: {
       type: Number,
       required: true,

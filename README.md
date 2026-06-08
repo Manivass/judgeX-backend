@@ -9,3 +9,5 @@
 created submission schema 
 
 /codesubmission - to save the submission code
+
+/run/:problemId , /codeSubmission/:problemId and get the result of testcase 

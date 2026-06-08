@@ -52,6 +52,10 @@ const submissionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+
+    testcaseResults: {
+      types: [Boolean],
+    },
   },
   { timestamps: true },
 );

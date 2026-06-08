@@ -140,13 +140,13 @@ const editValidateQuestion = ({
   }
 };
 
-const validateSubmissionCode = async (
+const validateSubmissionCode = async ({
   sourceCode,
   language,
   verdict,
   executionTime,
   memory,
-) => {
+}) => {
   if (
     !sourceCode ||
     !language ||
