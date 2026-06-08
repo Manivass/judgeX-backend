@@ -1,6 +1,6 @@
 const express = require("express");
 const User = require("../models/user");
-const { validateSignUp } = require("../validation");
+const { validateSignUp, validateProfile } = require("../validation");
 const bcrypt = require("bcrypt");
 const userAuth = require("../middleware/userAuth");
 const user = express.Router();
@@ -71,7 +71,7 @@ user.get("/profile", userAuth, async (req, res) => {
   try {
     const _id = req.user._id;
     const userAvailable = await User.findById(_id).select(
-      "firstName lastName role",
+      "firstName lastName role profilePicture bio college linkedinURL solvedProblems attemptedProblems totalSubmissions acceptedSubmissions",
     );
     if (!userAvailable) {
       return res.status(404).json({ success: false, message: "no user found" });
@@ -87,6 +87,7 @@ user.post("/editProfile", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
     let edited = req.body;
+    validateProfile(edited);
     Object.keys(edited).forEach((val) => (loggedUser[val] = edited[val]));
     await loggedUser.save();
     res.status(200).json({ success: true, messagae: loggedUser });

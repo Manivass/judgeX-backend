@@ -1,8 +1,20 @@
-const validate = require("validator");
+const validator = require("validator");
 const User = require("./models/user");
 const { dataStructreTypes } = require("./constant");
 
-const validateSignUp = async ({ firstName, lastName, email, password }) => {
+const validateSignUp = async ({
+  firstName,
+  lastName,
+  role,
+  profilePicture,
+  bio,
+  college,
+  linkedinURL,
+  solvedProblems,
+  attemptedProblems,
+  totalSubmissions,
+  acceptedSubmissions,
+}) => {
   if (!firstName || !lastName || !email || !password) {
     throw new Error("pls fill all the credentails");
   }
@@ -20,12 +32,90 @@ const validateSignUp = async ({ firstName, lastName, email, password }) => {
     throw new Error("email already exists..");
   }
 
-  if (!validate.isEmail(email)) {
+  if (!validator.isEmail(email)) {
     throw new Error("email is not valid");
   }
 
-  if (!validate.isStrongPassword(password)) {
+  if (!validator.isStrongPassword(password)) {
     throw new Error("password is not strong");
+  }
+};
+
+const validateProfile = ({
+  firstName,
+  lastName,
+  profilePicture,
+  bio,
+  githubURL,
+  linkedinURL,
+  solvedProblems,
+  attemptedProblems,
+  totalSubmissions,
+  acceptedSubmissions,
+}) => {
+  if (!firstName && !firstName.trim().length === 0) {
+    throw new Error("pls fill first firstName");
+  }
+
+  if (firstName && firstName.length > 18 && firstName.length < 3) {
+    throw new Error(
+      "first name must have below 18 charcter and more than 3 character",
+    );
+  }
+
+  if (lastName && lastName.trim().length > 8) {
+    throw new Error("last name must have below 8 characters");
+  }
+
+  if (profilePicture && !validator.isURL(profilePicture)) {
+    throw new Error("profile picture URL is not valid");
+  }
+
+  if (linkedinURL && !validator.isURL(linkedinURL)) {
+    throw new Error("linkedin  URL is not valid");
+  }
+
+  if (
+    solvedProblems &&
+    (solvedProblems.easy < 0 ||
+      solvedProblems.medium < 0 ||
+      solvedProblems.hard < 0)
+  ) {
+    throw new Error("solved problems must greater than or equal to zero");
+  }
+
+  if (
+    attemptedProblems &&
+    (attemptedProblems.easy < 0 ||
+      attemptedProblems.medium < 0 ||
+      attemptedProblems.hard < 0)
+  ) {
+    throw new Error("attempted problems must greater than or equal to zero");
+  }
+  if (
+    totalSubmissions &&
+    (totalSubmissions.easy < 0 ||
+      totalSubmissions.medium < 0 ||
+      totalSubmissions.hard < 0)
+  ) {
+    throw new Error("total submissions must greater than or equal to zero");
+  }
+
+  if (
+    acceptedSubmissions &&
+    (acceptedSubmissions.easy < 0 ||
+      acceptedSubmissions.medium < 0 ||
+      acceptedSubmissions.hard < 0)
+  ) {
+    throw new Error("accepted submissions must greater than or equal to zero");
+  }
+
+  if (githubURL && !validator.isURL(githubURL)) {
+    throw new Error("github URL  is not valid");
+  }
+
+  if (bio && bio.length > 300) {
+    throw new Error("bio must have greater than 300 character");
   }
 };
 
@@ -183,4 +273,5 @@ module.exports = {
   validateQuestion,
   editValidateQuestion,
   validateSubmissionCode,
+  validateProfile,
 };

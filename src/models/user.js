@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema(
           throw new Error("Password is not strong");
         }
       },
+      select: false,
     },
     profilePicture: {
       type: String,
