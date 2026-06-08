@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema(
       },
       trim: true,
     },
+    problemSolved: {
+      required: true,
+      easy: Number,
+      meduim: Number,
+      hard: Number,
+    },
   },
   {
     timestamps: true,

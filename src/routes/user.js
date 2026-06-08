@@ -67,7 +67,23 @@ user.post("/logout", async (req, res) => {
   }
 });
 
-user.post("/profile", userAuth, async (req, res) => {
+user.get("/profile", userAuth, async (req, res) => {
+  try {
+    const _id = req.user._id;
+    const userAvailable = await User.findById(_id).select(
+      "firstName lastName role",
+    );
+    if (!userAvailable) {
+      return res.status(404).json({ success: false, message: "no user found" });
+    }
+
+    res.status(200).json({ success: true, user: userAvailable });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.messagae });
+  }
+});
+
+user.post("/editProfile", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
     let edited = req.body;
@@ -78,6 +94,5 @@ user.post("/profile", userAuth, async (req, res) => {
     res.status(400).json({ success: false, messagae: err.message });
   }
 });
-
 
 module.exports = user;
