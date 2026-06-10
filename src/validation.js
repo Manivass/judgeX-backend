@@ -5,6 +5,8 @@ const { dataStructreTypes } = require("./constant");
 const validateSignUp = async ({
   firstName,
   lastName,
+  email,
+  password,
   role,
   profilePicture,
   bio,
@@ -25,11 +27,6 @@ const validateSignUp = async ({
 
   if (lastName && lastName.length > 8) {
     throw new Error("lastname must up to 8 characters");
-  }
-
-  let isEmailFound = await User.findOne({ email });
-  if (isEmailFound) {
-    throw new Error("email already exists..");
   }
 
   if (!validator.isEmail(email)) {

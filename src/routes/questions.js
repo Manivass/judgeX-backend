@@ -97,7 +97,6 @@ question.post("/editQuestion/:id", userAuth, async (req, res) => {
         .status(403)
         .json({ success: false, message: "only user can access the page" });
     }
-
     const title = req.params.id;
     const isQuestionAvailable = await Question.findOne({ _id: id });
     let editedData = req.body;
@@ -107,7 +106,7 @@ question.post("/editQuestion/:id", userAuth, async (req, res) => {
         .status(404)
         .json({ success: false, message: "question is not available" });
     }
-
+    
     editValidateQuestion(editedData);
 
     Object.keys(editedData).forEach((key) => {

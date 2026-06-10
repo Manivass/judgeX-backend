@@ -4,11 +4,12 @@ const userAuth = require("../middleware/userAuth");
 const Question = require("../models/questions");
 const Submission = require("../models/submission");
 const { validateSubmissionCode } = require("../validation");
+const runCodeLimit = require("../middleware/rateLimit");
 
 require("dotenv").config();
 const code = express.Router();
 
-code.post("/run", userAuth, async (req, res) => {
+code.post("/run", userAuth, runCodeLimit, async (req, res) => {
   try {
     const { code, language_id, stdin } = req.body;
     // STEP 1 → submit code
@@ -63,10 +64,12 @@ code.post("/run", userAuth, async (req, res) => {
       break;
     }
 
-    return res.json({
+    res.json({
       success: true,
       result: result.data,
     });
+
+    setTimeout(() => {}, 1000);
   } catch (err) {
     console.log(err);
 

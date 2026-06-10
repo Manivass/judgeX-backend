@@ -4,11 +4,12 @@ require("dotenv").config();
 const userAuth = async (req, res, next) => {
   try {
     const { token } = req.cookies;
+    console.log;
     if (!token) {
       return res.status(400).json({ success: false, message: "please login" });
     }
-    const { email } = await jwt.verify(token, process.env.JWTKEY);
-    const user = await User.findOne({ email });
+    const { _id } = await jwt.verify(token, process.env.JWTKEY);
+    const user = await User.findById(_id);
     if (!user) {
       return res.status(400).json({ success: false, message: "invalid token" });
     }

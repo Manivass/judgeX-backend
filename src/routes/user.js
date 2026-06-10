@@ -39,7 +39,15 @@ user.post("/login", async (req, res) => {
 user.post("/signup", async (req, res) => {
   try {
     let { firstName, lastName, email, password } = req.body;
+    console.log(firstName + " " + lastName + " " + email + " " + password);
     await validateSignUp({ firstName, lastName, email, password });
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: "email already exists" });
+    }
     password = await bcrypt.hash(password, 10);
 
     const newUser = new User({ firstName, lastName, email, password });
@@ -51,7 +59,7 @@ user.post("/signup", async (req, res) => {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
 
-    res.status(201).json({ success: true, messagae: "successfully signed up" });
+    res.status(201).json({ success: true, message: "successfully signed up" });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
   }
