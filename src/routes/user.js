@@ -30,7 +30,6 @@ user.post("/login", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
-
     res.status(200).json({ success: true, message: "successfully logged in" });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -93,6 +92,34 @@ user.post("/editProfile", userAuth, async (req, res) => {
     res.status(200).json({ success: true, messagae: loggedUser });
   } catch (err) {
     res.status(400).json({ success: false, messagae: err.message });
+  }
+});
+
+user.get("/leaderboard", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    if (loggedUser.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can access the page" });
+    }
+
+    const sortUser = await User.find({})
+      .sort({
+        "solvedProblems.total": -1,
+        createdAt: 1,
+      })
+      .select("firstName lastName profilePicture solvedProblems.total");
+
+    if (sortUser.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no users found" });
+    }
+
+    res.status(200).json({ success: true, leaderboard: sortUser });
+  } catch (err) {
+    res.status(400).json({ success: false, messagae: err.messagae });
   }
 });
 

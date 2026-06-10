@@ -10,3 +10,5 @@ created submission schema
 
 
 /run/:problemId , /codeSubmission/:problemId and get the result of testcase 
+
+/leaderboard - to get the list of solved problems

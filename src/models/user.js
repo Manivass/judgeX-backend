@@ -103,6 +103,11 @@ const userSchema = new mongoose.Schema(
         required: true,
         default: 0,
       },
+      total: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
     },
     attemptedProblems: {
       easy: {
@@ -116,6 +121,11 @@ const userSchema = new mongoose.Schema(
         default: 0,
       },
       hard: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      total: {
         type: Number,
         required: true,
         default: 0,
@@ -137,6 +147,11 @@ const userSchema = new mongoose.Schema(
         required: true,
         default: 0,
       },
+      total: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
     },
     acceptedSubmissions: {
       easy: {
@@ -150,6 +165,11 @@ const userSchema = new mongoose.Schema(
         default: 0,
       },
       hard: {
+        type: Number,
+        required: true,
+        default: 0,
+      },
+      total: {
         type: Number,
         required: true,
         default: 0,
