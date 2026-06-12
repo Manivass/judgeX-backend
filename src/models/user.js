@@ -77,6 +77,13 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    authProvider: {
+      required: true,
+      enum: {
+        values: ["local", "google"],
+        message: `{VALUE} is not valid provider`,
+      },
+    },
     role: {
       type: String,
       enum: {
