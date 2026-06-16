@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     lastName: {
       type: String,
       trim: true,
-      maxLength: 8,
+      maxLength: 12,
     },
     email: {
       type: String,
@@ -31,7 +31,10 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.authProvider === "local";
+      },
+      select: false,
       trim: false,
       validate: function (value) {
         if (!validator.isStrongPassword(value)) {
@@ -61,6 +64,9 @@ const userSchema = new mongoose.Schema(
     college: {
       type: String,
     },
+    state: {
+      type: String,
+    },
     githubURL: {
       type: String,
       validate: function (value) {
@@ -78,7 +84,7 @@ const userSchema = new mongoose.Schema(
       },
     },
     authProvider: {
-      required: true,
+      type: String,
       enum: {
         values: ["local", "google"],
         message: `{VALUE} is not valid provider`,

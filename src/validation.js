@@ -25,7 +25,7 @@ const validateSignUp = async ({
     throw new Error("firstname must be in 3 to 8 characters");
   }
 
-  if (lastName && lastName.length > 8) {
+  if (lastName && lastName.length > 12) {
     throw new Error("lastname must up to 8 characters");
   }
 

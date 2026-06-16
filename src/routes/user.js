@@ -4,6 +4,10 @@ const { validateSignUp, validateProfile } = require("../validation");
 const bcrypt = require("bcrypt");
 const userAuth = require("../middleware/userAuth");
 const user = express.Router();
+const { OAuth2Client } = require("google-auth-library");
+const { indianStates, indianLoactions } = require("../constant");
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 user.post("/login", async (req, res) => {
   try {
@@ -62,6 +66,43 @@ user.post("/signup", async (req, res) => {
     res.status(201).json({ success: true, message: "successfully signed up" });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+user.post("/google-login", async (req, res) => {
+  try {
+    const { token, authProvider } = req.body;
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const user = ticket.getPayload();
+
+    const email = user.email;
+    const firstName = user.given_name;
+    const lastName = user.family_name;
+
+    let isUserAvailable = await User.findOne({ emailId: email });
+    if (!isUserAvailable) {
+      isUserAvailable = new User({
+        firstName,
+        lastName,
+        email: email,
+        authProvider,
+      });
+      await isUserAvailable.save();
+    }
+    const jwtToken = await isUserAvailable.getJWT();
+
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 60 * 60 * 1000 * 24),
+    });
+
+    res.status(200).json({ success: true, user: isUserAvailable });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 
@@ -128,6 +169,30 @@ user.get("/leaderboard", userAuth, async (req, res) => {
     res.status(200).json({ success: true, leaderboard: sortUser });
   } catch (err) {
     res.status(400).json({ success: false, messagae: err.messagae });
+  }
+});
+
+user.post("/state-location-search", userAuth, async (req, res) => {
+  try {
+    let search = req.body.search;
+    search = search.trim().toLowerCase();
+    if (!search) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+    const validState = indianLoactions.filter((state) =>
+      state.toLowerCase().includes(search),
+    );
+    if (validState.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no result found" });
+    }
+    res.status(200).json({ success: true, searchResult: validState });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 
