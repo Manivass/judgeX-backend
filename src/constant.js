@@ -70,7 +70,7 @@ const indianStates = [
 const unionTerritories = [
   "Andaman and Nicobar Islands",
   "Chandigarh",
-  "Dadra and Nagar Haveli and Daman and Diu",
+  "Dadra ",
   "Delhi",
   "Jammu and Kashmir",
   "Ladakh",

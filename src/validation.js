@@ -1,6 +1,6 @@
 const validator = require("validator");
 const User = require("./models/user");
-const { dataStructreTypes } = require("./constant");
+const { dataStructreTypes, indianLoactions } = require("./constant");
 
 const validateSignUp = async ({
   firstName,
@@ -45,19 +45,22 @@ const validateProfile = ({
   bio,
   githubURL,
   linkedinURL,
+  instagramURL,
   solvedProblems,
   attemptedProblems,
   totalSubmissions,
   acceptedSubmissions,
+  college,
+  contactEmail,
+  state,
+  phoneNumber,
 }) => {
-  if (!firstName && !firstName.trim().length === 0) {
+  if (!firstName && firstName.trim().length === 0) {
     throw new Error("pls fill first firstName");
   }
 
-  if (firstName && firstName.length > 18 && firstName.length < 3) {
-    throw new Error(
-      "first name must have below 18 charcter and more than 3 character",
-    );
+  if (firstName && (firstName.length > 18 || firstName.length < 3)) {
+    throw new Error("first name must have 3 to 18 character");
   }
 
   if (lastName && lastName.trim().length > 8) {
@@ -68,8 +71,19 @@ const validateProfile = ({
     throw new Error("profile picture URL is not valid");
   }
 
+  if (contactEmail && !validator.isEmail(contactEmail)) {
+    throw new Error("contact email is not valid");
+  }
+
   if (linkedinURL && !validator.isURL(linkedinURL)) {
     throw new Error("linkedin  URL is not valid");
+  }
+  if (instagramURL && !validator.isURL(instagramURL)) {
+    throw new Error("instagram  URL is not valid");
+  }
+
+  if (phoneNumber && !validator.isMobilePhone(phoneNumber)) {
+    throw new Error("phone number is not valid");
   }
 
   if (
@@ -96,6 +110,10 @@ const validateProfile = ({
       totalSubmissions.hard < 0)
   ) {
     throw new Error("total submissions must greater than or equal to zero");
+  }
+
+  if (state && !indianLoactions.includes(state)) {
+    throw new Error("state is not found");
   }
 
   if (

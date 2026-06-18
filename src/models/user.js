@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { indianLoactions } = require("../constant");
 require("dotenv").config();
 const userSchema = new mongoose.Schema(
   {
@@ -11,6 +12,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minLength: 3,
       maxLength: 18,
+      validation: function (value) {
+        if (value.length < 3 || value.length > 18) {
+          throw new Error("first name must be in 3 to 18 characters");
+        }
+      },
     },
     lastName: {
       type: String,
@@ -29,6 +35,7 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+
     password: {
       type: String,
       required: function () {
@@ -61,11 +68,32 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    contactEmail: {
+      type: String,
+      validate: function (value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("contact email is not valid email");
+        }
+      },
+    },
     college: {
       type: String,
     },
     state: {
       type: String,
+      validate: function (value) {
+        if (!indianLoactions.includes(value)) {
+          throw new Error(`${value} is not valid`);
+        }
+      },
+    },
+    phoneNumber: {
+      type: String,
+      validate: function (value) {
+        if (!validator.isMobilePhone(value)) {
+          throw new Error("phone number is not valid");
+        }
+      },
     },
     githubURL: {
       type: String,
@@ -80,6 +108,14 @@ const userSchema = new mongoose.Schema(
       validate: function (value) {
         if (!validator.isURL(value)) {
           throw new Error("linkedin URL is not valid");
+        }
+      },
+    },
+    instagramURL: {
+      type: String,
+      validate: function (value) {
+        if (!validator.isURL(value)) {
+          throw new Error("instagram URL is not valid");
         }
       },
     },

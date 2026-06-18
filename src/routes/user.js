@@ -83,12 +83,12 @@ user.post("/google-login", async (req, res) => {
     const firstName = user.given_name;
     const lastName = user.family_name;
 
-    let isUserAvailable = await User.findOne({ emailId: email });
+    let isUserAvailable = await User.findOne({ email });
     if (!isUserAvailable) {
       isUserAvailable = new User({
         firstName,
         lastName,
-        email: email,
+        email,
         authProvider,
       });
       await isUserAvailable.save();
@@ -138,9 +138,9 @@ user.post("/editProfile", userAuth, async (req, res) => {
     validateProfile(edited);
     Object.keys(edited).forEach((val) => (loggedUser[val] = edited[val]));
     await loggedUser.save();
-    res.status(200).json({ success: true, messagae: loggedUser });
+    res.status(200).json({ success: true, message: loggedUser });
   } catch (err) {
-    res.status(400).json({ success: false, messagae: err.message });
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 
@@ -174,8 +174,7 @@ user.get("/leaderboard", userAuth, async (req, res) => {
 
 user.post("/state-location-search", userAuth, async (req, res) => {
   try {
-    let search = req.body.search;
-    search = search.trim().toLowerCase();
+    let search = req.body?.value?.trim()?.toLowerCase();
     if (!search) {
       return res.status(400).json({
         success: false,
@@ -185,12 +184,9 @@ user.post("/state-location-search", userAuth, async (req, res) => {
     const validState = indianLoactions.filter((state) =>
       state.toLowerCase().includes(search),
     );
-    if (validState.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "no result found" });
-    }
-    res.status(200).json({ success: true, searchResult: validState });
+    res
+      .status(200)
+      .json({ success: true, searchResult: validState.slice(0, 5) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

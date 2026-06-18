@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const code = require("./routes/code.js");
 const questions = require("./routes/questions.js");
 const cors = require("cors");
+const dashboard = require("./routes/dashboard.js");
 
 require("dotenv").config();
 const app = express();
@@ -20,6 +21,7 @@ app.use("/", cookieParser());
 app.use("/", user);
 app.use("/", code);
 app.use("/", questions);
+app.use("/", dashboard);
 
 connectionDB()
   .then(() => {
