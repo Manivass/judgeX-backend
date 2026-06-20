@@ -11,12 +11,10 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       title,
       description,
       difficulty,
-      examples,
-      inputTestCases,
-      outputTestCases,
+      testcase,
       timeLimit,
       memoryLimit,
-      constraintsText,
+      constraint,
       dataStructure,
       explanation,
     } = req.body;
@@ -29,12 +27,10 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       title,
       description,
       difficulty,
-      examples,
-      inputTestCases,
-      outputTestCases,
+      testcase,
       timeLimit,
       memoryLimit,
-      constraintsText,
+      constraint,
       dataStructure,
       explanation,
     );
@@ -47,12 +43,10 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       title,
       description,
       difficulty,
-      examples,
-      inputTestCases,
-      outputTestCases,
+      testcase,
       timeLimit,
       memoryLimit,
-      constraintsText,
+      constraint,
       dataStructure,
       createdBy: loggedUser._id,
       explanation,
@@ -62,7 +56,7 @@ question.post("/addQuestions", userAuth, async (req, res) => {
 
     res
       .status(201)
-      .json({ success: true, message: "successfully question added" });
+      .json({ success: true, message: "question successfully  added" });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -106,7 +100,7 @@ question.post("/editQuestion/:id", userAuth, async (req, res) => {
         .status(404)
         .json({ success: false, message: "question is not available" });
     }
-    
+
     editValidateQuestion(editedData);
 
     Object.keys(editedData).forEach((key) => {

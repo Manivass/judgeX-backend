@@ -51,17 +51,15 @@ const questionsSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    constraintsText: {
+    constraints: {
       type: [String],
       required: true,
       lowercase: true,
     },
     dataStructure: {
-      type: String,
+      type: [String],
       required: true,
-      enum: {
-        values: dataStructreTypes,
-      },
+      lowercse: true,
     },
     createdBy: {
       type: mongoose.Types.ObjectId,

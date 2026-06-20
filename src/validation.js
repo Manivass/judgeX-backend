@@ -138,12 +138,10 @@ const validateQuestion = (
   title,
   description,
   difficulty,
-  examples,
-  inputTestCases,
-  outputTestCases,
+  testcase,
   timeLimit,
   memoryLimit,
-  constraintsText,
+  constraint,
   dataStructure,
   explanation,
 ) => {
@@ -151,13 +149,12 @@ const validateQuestion = (
     !title ||
     !description ||
     !difficulty ||
-    !examples ||
-    !inputTestCases ||
-    !outputTestCases ||
-    !timeLimit ||
-    !memoryLimit ||
-    !constraintsText ||
-    !dataStructure
+    testcase.length === 0 ||
+    timeLimit === undefined ||
+    memoryLimit === undefined ||
+    constraint.length === 0 ||
+    dataStructure.length === 0 ||
+    !explanation
   ) {
     throw new Error("pls fill all the credentials");
   }
@@ -176,21 +173,31 @@ const validateQuestion = (
     );
   }
 
-  if (examples.input.length !== examples.output.length) {
-    throw new Error("give proper example with  input and output");
+  if (timeLimit <= 0) {
+    throw new Error("pls enter the valid timelimit");
+  }
+  if (memoryLimit <= 0) {
+    throw new Error("pls enter the valid memlimit");
+  }
+  testcase?.forEach((tst) => {
+    if (!tst.input || !tst.output) {
+      throw new Error("test case input and output is required");
+    }
+  });
+
+  let unique = new Set(dataStructure);
+  if (unique.size !== dataStructure.length) {
+    throw new Error("duplicate datastructure found");
   }
 
-  if (inputTestCases.length !== outputTestCases.length) {
-    throw new Error("give proper testcases with  input and output");
+  if (dataStructure.length === 0) {
+    throw new Error("pls fill the data structure");
   }
 
-  if (constraintsText.length > 10) {
-    throw new Error("only 10 constraints are allowed");
-  }
-
-  if (!dataStructreTypes.includes(dataStructure)) {
-    throw new Error("data structure type is not valid");
-  }
+  const invalid = dataStructure?.find(
+    (val) => !dataStructreTypes.includes(val),
+  );
+  if (invalid) throw new Error(`${invalid} is not valid data Structure`);
 };
 const editValidateQuestion = ({
   title,
