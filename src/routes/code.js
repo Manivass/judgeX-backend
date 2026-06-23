@@ -9,7 +9,7 @@ const runCodeLimit = require("../middleware/rateLimit");
 require("dotenv").config();
 const code = express.Router();
 
-code.post("/run", userAuth, runCodeLimit, async (req, res) => {
+code.post("/run", runCodeLimit, async (req, res) => {
   try {
     const { code, language_id, stdin } = req.body;
     // STEP 1 → submit code
@@ -71,8 +71,6 @@ code.post("/run", userAuth, runCodeLimit, async (req, res) => {
 
     setTimeout(() => {}, 1000);
   } catch (err) {
-    console.log(err);
-
     return res.status(500).json({
       success: false,
       message: "execution failed",
@@ -96,7 +94,9 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
         .json({ success: false, message: "no question found" });
     }
 
-    let testcases = isProblemAvailable.testcase;
+    let testcases = isProblemAvailable.testcase.filter(
+      (val) => val.ishidden === true,
+    );
 
     let testcaseResults = [];
 

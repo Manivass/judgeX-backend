@@ -35,10 +35,6 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       explanation,
     );
 
-    if (!questionValid) {
-      return res.status(400);
-    }
-
     const newQuestion = new Question({
       title,
       description,
@@ -69,14 +65,14 @@ question.get("/questions", userAuth, async (req, res) => {
     const questions = await Question.find({})
       .skip((page - 1) * limit)
       .limit(limit);
-    const totalQuestions = Question.countDocuments();
+    const totalQuestions = await Question.countDocuments();
+    console.log(questions);
 
     res.status(200).json({
       success: true,
       questions,
       currentPage: page,
       totalQuestions,
-      totalPages: Math.ceil(totalQuestions / limitf),
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -136,6 +132,24 @@ question.delete("/deleteQuestion/:id", userAuth, async (req, res) => {
     res.status(200).json({ success: true, message: "successfully deleted" });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+question.get("/question/:questionId", async (req, res) => {
+  try {
+    const questionId = req.params.questionId;
+    console.log(questionId);
+
+    const question = await Question.findById(questionId);
+    if (!question) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no question found" });
+    }
+
+    res.status(200).json({ success: true, question });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err?.message });
   }
 });
 
