@@ -87,7 +87,7 @@ question.post("/editQuestion/:id", userAuth, async (req, res) => {
         .status(403)
         .json({ success: false, message: "only user can access the page" });
     }
-    const title = req.params.id;
+    const id = req.params.id;
     const isQuestionAvailable = await Question.findOne({ _id: id });
     let editedData = req.body;
 
@@ -138,7 +138,6 @@ question.delete("/deleteQuestion/:id", userAuth, async (req, res) => {
 question.get("/question/:questionId", async (req, res) => {
   try {
     const questionId = req.params.questionId;
-    console.log(questionId);
 
     const question = await Question.findById(questionId);
     if (!question) {

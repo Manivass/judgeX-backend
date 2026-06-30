@@ -246,9 +246,15 @@ const editValidateQuestion = ({
   if (constraintsText && constraintsText.length > 10) {
     throw new Error("only 10 constraints are allowed");
   }
+  if (dataStructure.length > 0) {
+    const invalidDataStructure = dataStructure.filter(
+      (ds) => !dataStructreTypes.includes(ds),
+    );
+    console.log(invalidDataStructure);
 
-  if (dataStructure && !dataStructreTypes.includes(dataStructure)) {
-    throw new Error("data structure type is not valid");
+    if (invalidDataStructure.length !== 0) {
+      throw new Error("data structure type is not valid");
+    }
   }
 };
 
@@ -269,7 +275,7 @@ const validateSubmissionCode = async ({
     throw new Error("pls fill all the credentials");
   }
 
-  if (!["javascript", "c++", "java", "python"].includes(language)) {
+  if (!["Javascript", "C", "Java", "Python"].includes(language)) {
     throw new Error("pls select a valid language");
   }
 

@@ -68,6 +68,14 @@ const questionsSchema = new mongoose.Schema(
     explanation: {
       type: String,
     },
+    editorial: [
+      {
+        approach: String,
+        algorithm: String,
+        complexity: String,
+        code: String,
+      },
+    ],
   },
   {
     timestamps: true,
