@@ -6,6 +6,7 @@ const code = require("./routes/code.js");
 const questions = require("./routes/questions.js");
 const cors = require("cors");
 const dashboard = require("./routes/dashboard.js");
+const submission = require("./routes/submission.js");
 
 require("dotenv").config();
 const app = express();
@@ -22,6 +23,7 @@ app.use("/", user);
 app.use("/", code);
 app.use("/", questions);
 app.use("/", dashboard);
+app.use("/", submission);
 
 connectionDB()
   .then(() => {

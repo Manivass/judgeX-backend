@@ -72,8 +72,11 @@ const questionsSchema = new mongoose.Schema(
       {
         approach: String,
         algorithm: String,
-        complexity: String,
-        code: String,
+        complexity: Object,
+        code: {
+          language: String,
+          solution: [String],
+        },
       },
     ],
   },
