@@ -18,12 +18,58 @@ submission.get("/getSubmission/:questionId", userAuth, async (req, res) => {
     const submissions = await Submission.find({
       userId: _id,
       problemId: questionId,
-    });
+    }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       message: "successfully get submission",
       submissions,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+submission.get("/getSolutions/:questionId", userAuth, async (req, res) => {
+  try {
+    let questionId = req.params.questionId;
+    const isQuestionAvailable = await Question.findById(questionId);
+    if (!isQuestionAvailable) {
+      return res
+        .status(404)
+        .json({ success: false, message: "question not found" });
+    }
+
+    const solutions = await Submission.aggregate([
+      {
+        $match: {
+          questionId: new mongoose.Types.ObjectId(questionId),
+          verdict: "Right Answer",
+        },
+      },
+      {
+        $sort: {
+          executionTime: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$userId",
+          bestSolution: {
+            $first: "$$ROOT",
+          },
+        },
+      },
+    ]);
+    solutions = await Submission.populate(solutions, {
+      path: "bestSolution.userId",
+      select: "firstName lastName",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "solutions fetched successfully",
+      solutions,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
