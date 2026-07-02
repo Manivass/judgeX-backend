@@ -106,7 +106,6 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
     let finalVerdict = "Wrong Answer";
 
     for (let testcase of testcases) {
-
       // STEP 1 → submit code
       const submission = await axios.post(
         "https://judge0-ce.p.rapidapi.com/submissions",
@@ -158,18 +157,18 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
         break;
       }
 
-      if (result.data.status.description !== "Accepted") {
-        const status = result.data.status.description;
+      const status = result.data.status.description;
 
-        if (status.includes("Runtime Error")) {
-          finalVerdict = "Runtime Error";
-        } else if (status.includes("Compilation Error")) {
-          finalVerdict = "Compilation Error";
-        } else if (status.includes("Time Limit Exceeded")) {
-          finalVerdict = "Time Limit Exceeded";
-        } else {
-          finalVerdict = status;
-        }
+      if (status === "Accepted") {
+        finalVerdict = "Right Answer";
+      } else if (status.includes("Runtime Error")) {
+        finalVerdict = "Runtime Error";
+      } else if (status.includes("Compilation Error")) {
+        finalVerdict = "Compilation Error";
+      } else if (status.includes("Time Limit Exceeded")) {
+        finalVerdict = "Time Limit Exceeded";
+      } else {
+        finalVerdict = status;
       }
 
       const expectedOutput = testcase.output.trim();
@@ -198,12 +197,13 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
       executionTime: finalResult?.data?.time,
       memory: finalResult?.data?.memory,
       testcaseResults,
+      
     });
     await newSubmission.save();
     res.status(201).json({
       success: true,
       message: "successfully saved...",
-      testcaseResults,
+      newSubmission,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

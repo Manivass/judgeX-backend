@@ -2,6 +2,8 @@ const express = require("express");
 const userAuth = require("../middleware/userAuth");
 const Question = require("../models/questions");
 const Submission = require("../models/submission");
+const mongoose = require("mongoose");
+const User = require("../models/user");
 
 const submission = express.Router();
 
@@ -30,7 +32,7 @@ submission.get("/getSubmission/:questionId", userAuth, async (req, res) => {
   }
 });
 
-submission.get("/getSolutions/:questionId", userAuth, async (req, res) => {
+submission.get("/getSolutions/:questionId", async (req, res) => {
   try {
     let questionId = req.params.questionId;
     const isQuestionAvailable = await Question.findById(questionId);
@@ -39,32 +41,39 @@ submission.get("/getSolutions/:questionId", userAuth, async (req, res) => {
         .status(404)
         .json({ success: false, message: "question not found" });
     }
-
     const solutions = await Submission.aggregate([
       {
         $match: {
-          questionId: new mongoose.Types.ObjectId(questionId),
+          problemId: new mongoose.Types.ObjectId(questionId),
           verdict: "Right Answer",
         },
       },
-      {
-        $sort: {
-          executionTime: 1,
-        },
-      },
+      { $sort: { executionTime: 1 } },
       {
         $group: {
           _id: "$userId",
-          bestSolution: {
-            $first: "$$ROOT",
-          },
+          bestSolution: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users", // collection name
+          localField: "_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $project: {
+          bestSolution: 1,
+          "user.firstName": 1,
+          "user.lastName": 1,
         },
       },
     ]);
-    solutions = await Submission.populate(solutions, {
-      path: "bestSolution.userId",
-      select: "firstName lastName",
-    });
 
     res.status(200).json({
       success: true,

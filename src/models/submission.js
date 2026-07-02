@@ -32,7 +32,7 @@ const submissionSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: [
-          "Accepted",
+          "Right Answer",
           "Wrong Answer",
           "Runtime Error",
           "Compilation Error",
@@ -54,7 +54,7 @@ const submissionSchema = new mongoose.Schema(
     },
 
     testcaseResults: {
-      types: [Boolean],
+      type: [String],
     },
   },
   { timestamps: true },

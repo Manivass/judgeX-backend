@@ -79,7 +79,34 @@ const questionsSchema = new mongoose.Schema(
         },
       },
     ],
+    disscuss: [
+      {
+        userId: {
+          type: mongoose.Types.ObjectId,
+          required: true,
+          ref: "User",
+        },
+        likes: {
+          type: Number,
+          default: 0,
+        },
+        text: {
+          type: String,
+          validate: function (value) {
+            if (value.length > 1000) {
+              throw new Error("text must less than 1000 character");
+            }
+          },
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now(),
+        },
+      },
+    ],
   },
+
   {
     timestamps: true,
   },
