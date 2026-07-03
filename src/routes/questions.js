@@ -152,4 +152,38 @@ question.get("/question/:questionId", async (req, res) => {
   }
 });
 
+question.post(
+  "/question/discussion/:questionId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const questionId = req.params.questionId;
+      const isQuestionAvailable = await Question.findById(questionId);
+      let { text } = req.body;
+      if (!isQuestionAvailable) {
+        return res
+          .status(404)
+          .json({ success: true, message: "no question found" });
+      }
+
+      if (!text || !text.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Discussion cannot be empty",
+        });
+      }
+      isQuestionAvailable.discussion.push({
+        userId: req.user._id,
+        text,
+      });
+
+      await isQuestionAvailable.save();
+      res
+        .status(201)
+        .json({ success: true, message: "successfully disscussion created" });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  },
+);
 module.exports = question;
