@@ -281,7 +281,7 @@ const validateSubmissionCode = async ({
 
   if (
     ![
-      "Right Answer",
+      "Accepted",
       "Wrong Answer",
       "Runtime Error",
       "Compilation Error",

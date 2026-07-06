@@ -157,6 +157,12 @@ const userSchema = new mongoose.Schema(
         required: true,
         default: 0,
       },
+      solvedQuestionsIds: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Question",
+        },
+      ],
     },
     attemptedProblems: {
       easy: {
@@ -179,6 +185,12 @@ const userSchema = new mongoose.Schema(
         required: true,
         default: 0,
       },
+      attemptedQuestionsIds: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Question",
+        },
+      ],
     },
     totalSubmissions: {
       easy: {

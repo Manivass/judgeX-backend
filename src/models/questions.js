@@ -79,12 +79,21 @@ const questionsSchema = new mongoose.Schema(
         },
       },
     ],
-    disscuss: [
+    discussion: [
       {
         userId: {
           type: mongoose.Types.ObjectId,
           required: true,
           ref: "User",
+        },
+        firstName: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        lastName: {
+          type: String,
+          trim: true,
         },
         likes: {
           type: Number,
@@ -101,7 +110,7 @@ const questionsSchema = new mongoose.Schema(
         },
         createdAt: {
           type: Date,
-          default: Date.now(),
+          default: Date.now,
         },
       },
     ],

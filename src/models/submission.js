@@ -32,7 +32,7 @@ const submissionSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: [
-          "Right Answer",
+          "Accepted",
           "Wrong Answer",
           "Runtime Error",
           "Compilation Error",

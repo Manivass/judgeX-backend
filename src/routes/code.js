@@ -156,11 +156,13 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
         }
         break;
       }
+      console.log(result.data.status);
 
       const status = result.data.status.description;
+      console.log(status);
 
       if (status === "Accepted") {
-        finalVerdict = "Right Answer";
+        finalVerdict = "Accepted";
       } else if (status.includes("Runtime Error")) {
         finalVerdict = "Runtime Error";
       } else if (status.includes("Compilation Error")) {
@@ -188,6 +190,8 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
       memory: finalResult?.data?.memory,
     });
 
+    const result = testcaseResults.every((val) => val === "pass");
+
     const newSubmission = new Submission({
       userId: loggedUser._id,
       problemId: isProblemAvailable._id,
@@ -197,13 +201,50 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
       executionTime: finalResult?.data?.time,
       memory: finalResult?.data?.memory,
       testcaseResults,
-      
+      result,
     });
+
     await newSubmission.save();
+
+    const allTestCasePassed = testcaseResults.every((val) => val === "pass");
+    if (allTestCasePassed) {
+      const isQuestionSolved =
+        loggedUser.solvedProblems.solvedQuestionsIds.some(
+          (id) => id.toString() === problemId,
+        );
+
+      if (!isQuestionSolved) {
+        loggedUser.solvedProblems.solvedQuestionsIds.push(problemId);
+        loggedUser.solvedProblems.total++;
+        if (isProblemAvailable.difficulty === "easy")
+          loggedUser.solvedProblems.easy++;
+        else if (isProblemAvailable.difficulty == "medium")
+          loggedUser.solvedProblems.medium++;
+        else loggedUser.solvedProblems.hard++;
+      }
+    } else {
+      const isQuestionAttempted =
+        loggedUser.attemptedProblems.attemptedQuestionsIds.some(
+          (id) => id.toString() === problemId,
+        );
+      if (!isQuestionAttempted) {
+        loggedUser.attemptedProblems.attemptedQuestionsIds.push(problemId);
+        loggedUser.attemptedProblems.total++;
+        if (isProblemAvailable.difficulty === "easy")
+          loggedUser.attemptedProblems.easy++;
+        else if (isProblemAvailable.difficulty == "medium")
+          loggedUser.attemptedProblems.medium++;
+        else loggedUser.attemptedProblems.hard++;
+      }
+    }
+
+    await loggedUser.save();
     res.status(201).json({
       success: true,
+      ispass: allTestCasePassed,
       message: "successfully saved...",
       newSubmission,
+      user: loggedUser,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

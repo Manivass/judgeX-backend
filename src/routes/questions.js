@@ -172,18 +172,24 @@ question.post(
           message: "Discussion cannot be empty",
         });
       }
+
       isQuestionAvailable.discussion.push({
         userId: req.user._id,
         text,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
       });
 
       await isQuestionAvailable.save();
-      res
-        .status(201)
-        .json({ success: true, message: "successfully disscussion created" });
+      res.status(201).json({
+        success: true,
+        message: "successfully disscussion created",
+        question: isQuestionAvailable,
+      });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
     }
   },
 );
+
 module.exports = question;
