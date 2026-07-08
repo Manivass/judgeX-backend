@@ -6,6 +6,7 @@ const Submission = require("../models/submission");
 const { validateSubmissionCode } = require("../validation");
 const runCodeLimit = require("../middleware/rateLimit");
 const { languageNumber } = require("../constant");
+const User = require("../models/user");
 
 require("dotenv").config();
 const code = express.Router();
@@ -156,10 +157,8 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
         }
         break;
       }
-      console.log(result.data.status);
 
       const status = result.data.status.description;
-      console.log(status);
 
       if (status === "Accepted") {
         finalVerdict = "Accepted";
@@ -207,6 +206,7 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
     await newSubmission.save();
 
     const allTestCasePassed = testcaseResults.every((val) => val === "pass");
+
     if (allTestCasePassed) {
       const isQuestionSolved =
         loggedUser.solvedProblems.solvedQuestionsIds.some(
@@ -237,14 +237,16 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
         else loggedUser.attemptedProblems.hard++;
       }
     }
-
     await loggedUser.save();
+
+    const updatedUser = await User.findById(loggedUser._id);
+
     res.status(201).json({
       success: true,
       ispass: allTestCasePassed,
       message: "successfully saved...",
       newSubmission,
-      user: loggedUser,
+      user: updatedUser,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

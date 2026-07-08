@@ -138,7 +138,7 @@ user.post("/editProfile", userAuth, async (req, res) => {
     validateProfile(edited);
     Object.keys(edited).forEach((val) => (loggedUser[val] = edited[val]));
     await loggedUser.save();
-    res.status(200).json({ success: true, message: loggedUser });
+    res.status(200).json({ success: true, updatedUser: loggedUser });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

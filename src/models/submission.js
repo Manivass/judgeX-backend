@@ -56,6 +56,10 @@ const submissionSchema = new mongoose.Schema(
     testcaseResults: {
       type: [String],
     },
+    result: {
+      type: Boolean,
+      required: true,
+    },
   },
   { timestamps: true },
 );

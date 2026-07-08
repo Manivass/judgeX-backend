@@ -85,4 +85,25 @@ submission.get("/getSolutions/:questionId", async (req, res) => {
   }
 });
 
+submission.get("/totalSubmissions", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    const totalSubmissions = await Submission.countDocuments({
+      userId: loggedUser._id,
+    });
+
+    const passedSubmissions = await Submission.countDocuments({
+      userId: loggedUser._id,
+      result: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      submission: { totalSubmissions, passedSubmissions },
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = submission;

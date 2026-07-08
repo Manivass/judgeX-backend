@@ -66,13 +66,18 @@ question.get("/questions", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
     const totalQuestions = await Question.countDocuments();
-    console.log(questions);
+    const easyQuestion = await Question.countDocuments({ difficulty: "easy" });
+    const mediumQuestion = await Question.countDocuments({
+      difficulty: "medium",
+    });
+    const hardQuestion = await Question.countDocuments({ difficulty: "hard" });
 
     res.status(200).json({
       success: true,
       questions,
       currentPage: page,
       totalQuestions,
+      questionCount: { easyQuestion, mediumQuestion, hardQuestion },
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
