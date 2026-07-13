@@ -12,16 +12,18 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 user.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const isEmailAvailable = await User.findOne({ email });
 
+    const isEmailAvailable = await User.findOne({ email });
     if (!isEmailAvailable) {
       return res
         .status(400)
         .json({ success: false, message: "invalid credentials" });
     }
 
-    const isPasswordCorrect =
-      await isEmailAvailable.comparePasswordAndHash(password);
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      isEmailAvailable.password,
+    );
 
     if (!isPasswordCorrect) {
       return res
@@ -34,7 +36,13 @@ user.post("/login", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
-    res.status(200).json({ success: true, message: "successfully logged in" });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "successfully logged in",
+        user: isEmailAvailable,
+      });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -43,7 +51,6 @@ user.post("/login", async (req, res) => {
 user.post("/signup", async (req, res) => {
   try {
     let { firstName, lastName, email, password } = req.body;
-    console.log(firstName + " " + lastName + " " + email + " " + password);
     await validateSignUp({ firstName, lastName, email, password });
     const existingUser = await User.findOne({ email });
 
@@ -63,7 +70,11 @@ user.post("/signup", async (req, res) => {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
 
-    res.status(201).json({ success: true, message: "successfully signed up" });
+    res.status(201).json({
+      success: true,
+      message: "successfully signed up",
+      user: newUser,
+    });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
   }

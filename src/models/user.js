@@ -41,14 +41,12 @@ const userSchema = new mongoose.Schema(
       required: function () {
         return this.authProvider === "local";
       },
-      select: false,
       trim: false,
       validate: function (value) {
         if (!validator.isStrongPassword(value)) {
           throw new Error("Password is not strong");
         }
       },
-      select: false,
     },
     profilePicture: {
       type: String,
@@ -241,11 +239,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
-userSchema.methods.comparePasswordAndHash = async function (password) {
-  const isPasswordValid = await bcrypt.compare(password, this.password);
-  return isPasswordValid;
-};
 
 userSchema.methods.getJWT = async function () {
   const token = jwt.sign({ _id: this._id }, process.env.JWTKEY, {

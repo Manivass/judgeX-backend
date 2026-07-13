@@ -8,11 +8,6 @@ const dashboard = express.Router();
 
 dashboard.get("/dashboard/stats", userAuth, async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ success: false, message: "only admin can access the page" });
-    }
     const totalUser = await User.countDocuments();
     const easyQuestions = await Question.countDocuments({ difficulty: "easy" });
     const mediumQuestions = await Question.countDocuments({
