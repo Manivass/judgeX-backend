@@ -63,6 +63,7 @@ question.get("/questions", userAuth, async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const questions = await Question.find({})
+      .sort({ questionNumber: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
     const totalQuestions = await Question.countDocuments();

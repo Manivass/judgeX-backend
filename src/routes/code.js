@@ -14,6 +14,8 @@ const code = express.Router();
 code.post("/run", runCodeLimit, async (req, res) => {
   try {
     const { code, language_id, stdin } = req.body;
+    console.log(code + " " + language_id + " " + stdin);
+
     // STEP 1 → submit code
     const submission = await axios.post(
       "https://judge0-ce.p.rapidapi.com/submissions",
@@ -34,6 +36,7 @@ code.post("/run", runCodeLimit, async (req, res) => {
         },
       },
     );
+    console.log(submission);
 
     const token = submission.data.token;
 
@@ -73,6 +76,11 @@ code.post("/run", runCodeLimit, async (req, res) => {
 
     setTimeout(() => {}, 1000);
   } catch (err) {
+    console.log("========== ERROR ==========");
+    console.log("Message:", err.message);
+    console.log("Status:", err.response?.status);
+    console.log("Data:", err.response?.data);
+    console.log("===========================");
     return res.status(500).json({
       success: false,
       message: "execution failed",

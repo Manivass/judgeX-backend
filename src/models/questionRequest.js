@@ -1,13 +1,12 @@
 const mongoose = require("mongoose");
 const { dataStructreTypes } = require("../constant");
 
-const questionsSchema = new mongoose.Schema(
+const questionRequestSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       trim: true,
       required: true,
-      unique: true,
     },
     description: {
       type: String,
@@ -61,64 +60,34 @@ const questionsSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
-    createdBy: {
-      type: mongoose.Types.ObjectId,
-      required: true,
-    },
     explanation: {
       type: String,
     },
-    editorial: [
-      {
-        approach: String,
-        algorithm: String,
-        complexity: Object,
-        code: {
-          language: String,
-          solution: [String],
-        },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ["pending", "accepted", "rejected"],
+        message: `{VALUE} is not valid status`,
       },
-    ],
-    discussion: [
-      {
-        userId: {
-          type: mongoose.Types.ObjectId,
-          required: true,
-          ref: "User",
-        },
-        firstName: {
-          type: String,
-          required: true,
-          trim: true,
-        },
-        lastName: {
-          type: String,
-          trim: true,
-        },
-        likes: {
-          type: Number,
-          default: 0,
-        },
-        text: {
-          type: String,
-          validate: function (value) {
-            if (value.length > 1000) {
-              throw new Error("text must less than 1000 character");
-            }
-          },
-          trim: true,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
+      default: "pending",
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    reviewReason: {
+      type: String,
+    },
   },
 
   {
     timestamps: true,
   },
 );
-let Question = new mongoose.model("Question", questionsSchema);
+let Question = new mongoose.model("QuestionRequest", questionRequestSchema);
 module.exports = Question;
