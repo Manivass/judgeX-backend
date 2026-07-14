@@ -89,5 +89,8 @@ const questionRequestSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-let Question = new mongoose.model("QuestionRequest", questionRequestSchema);
-module.exports = Question;
+let QuestionRequest = new mongoose.model(
+  "QuestionRequest",
+  questionRequestSchema,
+);
+module.exports = QuestionRequest;

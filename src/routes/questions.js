@@ -14,7 +14,7 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       testcase,
       timeLimit,
       memoryLimit,
-      constraint,
+      constraints,
       dataStructure,
       explanation,
     } = req.body;
@@ -30,7 +30,7 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       testcase,
       timeLimit,
       memoryLimit,
-      constraint,
+      constraints,
       dataStructure,
       explanation,
     );
@@ -42,7 +42,7 @@ question.post("/addQuestions", userAuth, async (req, res) => {
       testcase,
       timeLimit,
       memoryLimit,
-      constraint,
+      constraints,
       dataStructure,
       createdBy: loggedUser._id,
       explanation,

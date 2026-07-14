@@ -141,7 +141,7 @@ const validateQuestion = (
   testcase,
   timeLimit,
   memoryLimit,
-  constraint,
+  constraints,
   dataStructure,
   explanation,
 ) => {
@@ -152,7 +152,7 @@ const validateQuestion = (
     testcase.length === 0 ||
     timeLimit === undefined ||
     memoryLimit === undefined ||
-    constraint.length === 0 ||
+    constraints.length === 0 ||
     dataStructure.length === 0 ||
     !explanation
   ) {
