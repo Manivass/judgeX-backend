@@ -78,4 +78,80 @@ questionRequest.post("/questionRequest", userAuth, async (req, res) => {
   }
 });
 
+questionRequest.post("/reviewquestion/:id", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    const { id } = req.params;
+    if (loggedUser.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can review the page" });
+    }
+    const isRequestAvailable = await questionRequest.findById(id);
+    if (!isRequestAvailable) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no request found" });
+    }
+    const { reviewComment, status } = req.body;
+    if (!["accepted", "rejected"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "invalid status" });
+    }
+    if (isRequestAvailable.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Request has already been reviewed",
+      });
+    }
+    if (status === "rejected" && !reviewComment?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Review comment is required when rejecting a request",
+      });
+    }
+
+    if (status === "accepted") {
+      const exists = await Question.findOne({
+        title: isRequestAvailable.title,
+      });
+
+      if (exists) {
+        return res.status(400).json({
+          success: false,
+          message: "Question already exists",
+        });
+      }
+
+      const totalQuestion = await Question.countDocuments();
+      const newQuestion = new Question({
+        title: isRequestAvailable.title,
+        description: isRequestAvailable.description,
+        difficulty: isRequestAvailable.difficulty,
+        testcase: isRequestAvailable.testcase,
+        timeLimit: isRequestAvailable.timeLimit,
+        memoryLimit: isRequestAvailable.memoryLimit,
+        constraints: isRequestAvailable.constraints,
+        dataStructure: isRequestAvailable.dataStructure,
+        explanation: isRequestAvailable.explanation,
+        questionNumber: totalQuestion + 1,
+      });
+      await newQuestion.save();
+    }
+
+    isRequestAvailable.reviewedBy = loggedUser._id;
+    isRequestAvailable.status = status;
+    isRequestAvailable.reviewReason = reviewComment;
+    await isRequestAvailable.save();
+    return res.status(200).json({
+      success: true,
+      message: `Question ${status} successfully`,
+      questionRequest: isRequestAvailable,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = questionRequest;
