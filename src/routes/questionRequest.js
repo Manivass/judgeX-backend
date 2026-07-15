@@ -4,6 +4,7 @@ const { validateQuestion } = require("../validation");
 const Question = require("../models/questions");
 const QuestionRequest = require("../models/questionRequest");
 const questionRequest = express.Router();
+const mongoose = require("mongoose");
 
 questionRequest.post("/questionRequest", userAuth, async (req, res) => {
   try {
@@ -87,14 +88,14 @@ questionRequest.post("/reviewquestion/:id", userAuth, async (req, res) => {
         .status(403)
         .json({ success: false, message: "only admin can review the page" });
     }
-    const isRequestAvailable = await questionRequest.findById(id);
+    const isRequestAvailable = await QuestionRequest.findById(id);
     if (!isRequestAvailable) {
       return res
         .status(404)
         .json({ success: false, message: "no request found" });
     }
-    const { reviewComment, status } = req.body;
-    if (!["accepted", "rejected"].includes(status)) {
+    const { status } = req.body;
+    if (!["approved", "rejected"].includes(status)) {
       return res
         .status(400)
         .json({ success: false, message: "invalid status" });
@@ -103,12 +104,6 @@ questionRequest.post("/reviewquestion/:id", userAuth, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Request has already been reviewed",
-      });
-    }
-    if (status === "rejected" && !reviewComment?.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Review comment is required when rejecting a request",
       });
     }
 
@@ -142,7 +137,6 @@ questionRequest.post("/reviewquestion/:id", userAuth, async (req, res) => {
 
     isRequestAvailable.reviewedBy = loggedUser._id;
     isRequestAvailable.status = status;
-    isRequestAvailable.reviewReason = reviewComment;
     await isRequestAvailable.save();
     return res.status(200).json({
       success: true,
@@ -190,7 +184,6 @@ questionRequest.get("/getRequests", userAuth, async (req, res) => {
     res.status(400).json({ success: false, message: err?.message });
   }
 });
-
 
 questionRequest.get("/request/:id", userAuth, async (req, res) => {
   try {

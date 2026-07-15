@@ -71,7 +71,7 @@ const questionRequestSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["pending", "accepted", "rejected"],
+        values: ["pending", "approved", "rejected"],
         message: `{VALUE} is not valid status`,
       },
       default: "pending",
@@ -79,9 +79,6 @@ const questionRequestSchema = new mongoose.Schema(
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-    },
-    reviewReason: {
-      type: String,
     },
   },
 
