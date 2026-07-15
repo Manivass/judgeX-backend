@@ -191,4 +191,49 @@ questionRequest.get("/getRequests", userAuth, async (req, res) => {
   }
 });
 
+
+questionRequest.get("/request/:id", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+
+    if (loggedUser.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only admin can access this page",
+      });
+    }
+
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid request id",
+      });
+    }
+
+    const request = await QuestionRequest.findOne({
+      _id: id,
+      status: "pending",
+    }).populate("createdBy", "firstName lastName email profilePicture");
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Question request not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Question request fetched successfully",
+      request,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
 module.exports = questionRequest;
