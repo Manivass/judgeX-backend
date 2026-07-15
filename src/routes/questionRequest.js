@@ -154,4 +154,41 @@ questionRequest.post("/reviewquestion/:id", userAuth, async (req, res) => {
   }
 });
 
+questionRequest.get("/getRequests", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    if (loggedUser.role !== "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can access the page" });
+    }
+    const requests = await QuestionRequest.find({ status: "pending" })
+      .populate("createdBy", "firstName lastName email profilePicture")
+      .sort({ createdAt: -1 });
+    const pendingRequests = await QuestionRequest.countDocuments({
+      status: "pending",
+    });
+    const acceptedRequests = await QuestionRequest.countDocuments({
+      status: "accepted",
+    });
+    const rejectedRequests = await QuestionRequest.countDocuments({
+      status: "rejected",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "successfully fetched the details",
+      requests,
+      stats: {
+        pending: pendingRequests,
+        rejected: rejectedRequests,
+        accepted: acceptedRequests,
+        total: pendingRequests + rejectedRequests + acceptedRequests,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err?.message });
+  }
+});
+
 module.exports = questionRequest;
