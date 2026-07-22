@@ -141,6 +141,32 @@ question.delete("/deleteQuestion/:id", userAuth, async (req, res) => {
   }
 });
 
+question.get("/question/search/:difficulty", userAuth, async (req, res) => {
+  try {
+    const difficulty = req.params.difficulty;
+    if (!["all", "easy", "medium", "hard"].includes(difficulty)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid difficulty",
+      });
+    }
+
+    const filter = {};
+
+    if (difficulty !== "all") {
+      filter.difficulty = difficulty;
+    }
+
+    const getQuestions = await Question.find(filter);
+    res.status(200).json({
+      success: true,
+      message: "successfully fetched",
+      questions: getQuestions,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
 question.get("/question/:questionId", async (req, res) => {
   try {
     const questionId = req.params.questionId;
