@@ -2,6 +2,7 @@ const express = require("express");
 const Question = require("../models/questions");
 const userAuth = require("../middleware/userAuth");
 const { validateQuestion, editValidateQuestion } = require("../validation");
+const { dataStructreTypes } = require("../constant");
 const question = express.Router();
 
 question.post("/addQuestions", userAuth, async (req, res) => {
@@ -141,13 +142,21 @@ question.delete("/deleteQuestion/:id", userAuth, async (req, res) => {
   }
 });
 
-question.get("/question/search/:difficulty", userAuth, async (req, res) => {
+question.get("/question/search", userAuth, async (req, res) => {
   try {
-    const difficulty = req.params.difficulty;
+    const difficulty = req.query.difficulty || "all";
+    const dataStructure = req.query.dataStructure || "all";
+
     if (!["all", "easy", "medium", "hard"].includes(difficulty)) {
       return res.status(400).json({
         success: false,
         message: "Invalid difficulty",
+      });
+    }
+    if (dataStructure != "all" && !dataStructreTypes.includes(dataStructure)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid dataStructure",
       });
     }
 
@@ -155,6 +164,9 @@ question.get("/question/search/:difficulty", userAuth, async (req, res) => {
 
     if (difficulty !== "all") {
       filter.difficulty = difficulty;
+    }
+    if (dataStructure !== "all") {
+      filter.dataStructure = dataStructure;
     }
 
     const getQuestions = await Question.find(filter);
