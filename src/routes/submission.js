@@ -106,4 +106,32 @@ submission.get("/totalSubmissions", userAuth, async (req, res) => {
   }
 });
 
+submission.get("/recentSubmissions", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    const submissions = await Submission.find({ userId: loggedUser._id })
+      .populate("problemId", "title difficulty")
+      .sort({
+        createdAt: -1,
+      });
+
+    const seen = new Set();
+    const recentProblems = [];
+    for (let submission of submissions) {
+      const questionId = submission.problemId.toString();
+      if (!seen.has(questionId)) {
+        seen.add(questionId);
+        recentProblems.push(submission);
+      }
+    }
+    res.status(200).json({
+      success: true,
+      message: "successfully fetched",
+      submissions: recentProblems,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err?.message });
+  }
+});
+
 module.exports = submission;
