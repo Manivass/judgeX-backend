@@ -106,6 +106,28 @@ submission.get("/totalSubmissions", userAuth, async (req, res) => {
   }
 });
 
+submission.get("/submissionDetails/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getDetails = await Submission.findById(id).populate(
+      "problemId",
+      "title difficulty",
+    );
+    if (!getDetails) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no submission found" });
+    }
+    res.status(200).json({
+      success: true,
+      message: "successfully fetched ",
+      submission: getDetails,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 submission.get("/recentSubmissions/:id", userAuth, async (req, res) => {
   try {
     const { id } = req.params;
