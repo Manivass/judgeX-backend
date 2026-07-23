@@ -106,10 +106,10 @@ submission.get("/totalSubmissions", userAuth, async (req, res) => {
   }
 });
 
-submission.get("/recentSubmissions", userAuth, async (req, res) => {
+submission.get("/recentSubmissions/:id", userAuth, async (req, res) => {
   try {
-    const loggedUser = req.user;
-    const submissions = await Submission.find({ userId: loggedUser._id })
+    const { id } = req.params;
+    const submissions = await Submission.find({ userId: id })
       .populate("problemId", "title difficulty")
       .sort({
         createdAt: -1,
