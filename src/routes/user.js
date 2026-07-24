@@ -36,13 +36,11 @@ user.post("/login", async (req, res) => {
     res.cookie("token", token, {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "successfully logged in",
-        user: isEmailAvailable,
-      });
+    res.status(200).json({
+      success: true,
+      message: "successfully logged in",
+      user: isEmailAvailable,
+    });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -152,6 +150,27 @@ user.post("/editProfile", userAuth, async (req, res) => {
     res.status(200).json({ success: true, updatedUser: loggedUser });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+user.get("/getuser/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const isUserAvailable = await User.findById(id);
+    if (!isUserAvailable)
+      return res
+        .status(404)
+        .json({ success: "false", messagae: "no user found" });
+
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "user successfullt fetched",
+        user: isUserAvailable,
+      });
+  } catch (err) {
+    res.status(400).json({ success: false, messagae: err.messagae });
   }
 });
 
