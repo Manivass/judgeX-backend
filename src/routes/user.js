@@ -162,13 +162,11 @@ user.get("/getuser/:id", async (req, res) => {
         .status(404)
         .json({ success: "false", messagae: "no user found" });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "user successfullt fetched",
-        user: isUserAvailable,
-      });
+    res.status(200).json({
+      success: true,
+      message: "user successfullt fetched",
+      user: isUserAvailable,
+    });
   } catch (err) {
     res.status(400).json({ success: false, messagae: err.messagae });
   }
@@ -177,18 +175,15 @@ user.get("/getuser/:id", async (req, res) => {
 user.get("/leaderboard", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
-    if (loggedUser.role !== "admin") {
-      return res
-        .status(403)
-        .json({ success: false, message: "only admin can access the page" });
-    }
 
     const sortUser = await User.find({})
       .sort({
         "solvedProblems.total": -1,
         createdAt: 1,
       })
-      .select("firstName lastName profilePicture solvedProblems.total");
+      .select(
+        "firstName lastName profilePicture solvedProblems.total solvedProblems.easy solvedProblems.medium solvedProblems.hard",
+      );
 
     if (sortUser.length === 0) {
       return res
@@ -198,7 +193,7 @@ user.get("/leaderboard", userAuth, async (req, res) => {
 
     res.status(200).json({ success: true, leaderboard: sortUser });
   } catch (err) {
-    res.status(400).json({ success: false, messagae: err.messagae });
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 

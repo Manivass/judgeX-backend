@@ -85,15 +85,16 @@ submission.get("/getSolutions/:questionId", async (req, res) => {
   }
 });
 
-submission.get("/totalSubmissions", userAuth, async (req, res) => {
+submission.get("/totalSubmissions/:id", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
+    const { id } = req.params;
     const totalSubmissions = await Submission.countDocuments({
-      userId: loggedUser._id,
+      userId: id,
     });
 
     const passedSubmissions = await Submission.countDocuments({
-      userId: loggedUser._id,
+      userId: id,
       result: true,
     });
 
@@ -128,7 +129,7 @@ submission.get("/submissionDetails/:id", async (req, res) => {
   }
 });
 
-submission.get("/recentSubmissions/:id", userAuth, async (req, res) => {
+submission.get("/recentSubmissions/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const submissions = await Submission.find({ userId: id })
