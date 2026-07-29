@@ -3,6 +3,7 @@ const Question = require("../models/questions");
 const userAuth = require("../middleware/userAuth");
 const { validateQuestion, editValidateQuestion } = require("../validation");
 const { dataStructreTypes } = require("../constant");
+const Setting = require("../models/settings");
 const question = express.Router();
 
 question.post("/addQuestions", userAuth, async (req, res) => {
@@ -235,5 +236,17 @@ question.post(
     }
   },
 );
+
+question.get("/problemOfTheDay", async (req, res) => {
+  try {
+    const setting = await Setting.findOne().populate("problemOfDay");
+    res.json({
+      success: true,
+      question: setting.problemOfDay,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
 
 module.exports = question;
