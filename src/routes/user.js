@@ -6,6 +6,7 @@ const userAuth = require("../middleware/userAuth");
 const user = express.Router();
 const { OAuth2Client } = require("google-auth-library");
 const { indianStates, indianLoactions } = require("../constant");
+const Submission = require("../models/submission");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -214,6 +215,25 @@ user.post("/state-location-search", userAuth, async (req, res) => {
       .json({ success: true, searchResult: validState.slice(0, 5) });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+user.get("/heatmap", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    const allsubmission = await Submission.find({ userId: loggedUser._id });
+    const heatmap = {};
+    for (let submission of allsubmission) {
+      const date = submission.createdAt.toISOString().split("T")[0];
+      if (!heatmap[date]) {
+        heatmap[date] = 1;
+      } else {
+        heatmap[date]++;
+      }
+    }
+    res.status(200).json({ success: true, heatmap });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err?.message });
   }
 });
 

@@ -10,6 +10,7 @@ const submission = require("./routes/submission.js");
 const questionRequest = require("./routes/questionRequest.js");
 
 require("dotenv").config();
+require("./utils/cron.js");
 const app = express();
 
 app.use(
