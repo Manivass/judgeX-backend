@@ -234,6 +234,20 @@ const userSchema = new mongoose.Schema(
         default: 0,
       },
     },
+    topicProgress: {
+      type: Map,
+      of: {
+        attempted: {
+          type: Number,
+          default: 0,
+        },
+        solved: {
+          type: Number,
+          default: 0,
+        },
+      },
+      default: {},
+    },
   },
   {
     timestamps: true,

@@ -245,6 +245,18 @@ code.post("/codeSubmission/:problemId", userAuth, async (req, res) => {
         else loggedUser.attemptedProblems.hard++;
       }
     }
+
+    for (let tag of isProblemAvailable.dataStructure) {
+      const current = loggedUser.topicProgress.get(tag) || {
+        attempted: 0,
+        solved: 0,
+      };
+
+      current.attempted++;
+      if (allTestCasePassed) current.solved++;
+
+      loggedUser.topicProgress.set(tag, current);
+    }
     await loggedUser.save();
 
     const updatedUser = await User.findById(loggedUser._id);
