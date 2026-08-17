@@ -3,8 +3,7 @@ const userAuth = require("../middleware/userAuth");
 const User = require("../models/user");
 const Question = require("../models/questions");
 const Submission = require("../models/submission");
-
-import User from "../models/user.js";
+const submission = require("./submission");
 
 const dashboard = express.Router();
 
@@ -41,4 +40,53 @@ dashboard.get("/admin/dashboard/stats", userAuth, async (req, res) => {
   }
 });
 
+dashboard.get("/admin/getRecentProblems", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    if (loggedUser.role != "admin") {
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can access the page" });
+    }
+    const getQuestions = await Question.find().sort({ createdAt: 1 }).limit(5);
+    res.status(200).json({
+      success: true,
+      message: "successfully fetched",
+      question: getQuestions,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+dashboard.get("/admin/getSubmissions", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+
+    if (loggedUser.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Only admin can access this page",
+      });
+    }
+
+    const getSubmissions = await Submission.find()
+      .populate("problemId", "title")
+      .populate("userId", "firstName lastName")
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    console.log(getSubmissions);
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully fetched",
+      submissions: getSubmissions,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
 module.exports = dashboard;
