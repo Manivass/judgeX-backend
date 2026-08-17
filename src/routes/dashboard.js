@@ -4,9 +4,11 @@ const User = require("../models/user");
 const Question = require("../models/questions");
 const Submission = require("../models/submission");
 
+import User from "../models/user.js";
+
 const dashboard = express.Router();
 
-dashboard.get("/dashboard/stats", userAuth, async (req, res) => {
+dashboard.get("/admin/dashboard/stats", userAuth, async (req, res) => {
   try {
     const totalUser = await User.countDocuments();
     const easyQuestions = await Question.countDocuments({ difficulty: "easy" });
@@ -16,6 +18,11 @@ dashboard.get("/dashboard/stats", userAuth, async (req, res) => {
     const hardQuestions = await Question.countDocuments({ difficulty: "hard" });
     const totalQuestions = easyQuestions + mediumQuestions + hardQuestions;
     const submissions = await Submission.countDocuments();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const newUsers = await User.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo },
+    });
 
     res.status(200).json({
       success: true,
@@ -26,6 +33,7 @@ dashboard.get("/dashboard/stats", userAuth, async (req, res) => {
         hardQuestions,
         totalQuestions,
         submissions,
+        newUsers,
       },
     });
   } catch (err) {

@@ -175,26 +175,48 @@ user.get("/getuser/:id", async (req, res) => {
 
 user.get("/leaderboard", userAuth, async (req, res) => {
   try {
-    const loggedUser = req.user;
+    let page = Number(req.query.page) || 1;
+    let limit = Number(req.query.limit) || 10;
 
-    const sortUser = await User.find({})
+    if (page < 1) page = 1;
+    if (limit < 1 || limit > 10) limit = 10;
+
+    const skip = (page - 1) * limit;
+
+    const totalUsers = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    const users = await User.find()
+      .select(
+        "firstName lastName username email profilePicture solvedProblems isBlocked createdAt",
+      )
       .sort({
         "solvedProblems.total": -1,
         createdAt: 1,
       })
-      .select(
-        "firstName lastName profilePicture solvedProblems.total solvedProblems.easy solvedProblems.medium solvedProblems.hard",
-      );
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-    if (sortUser.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "no users found" });
-    }
-
-    res.status(200).json({ success: true, leaderboard: sortUser });
+    res.status(200).json({
+      success: true,
+      leaderboard: users,
+      pagination: {
+        currentPage: page,
+        limit,
+        totalUsers,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    console.error("Leaderboard error:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch leaderboard",
+    });
   }
 });
 
