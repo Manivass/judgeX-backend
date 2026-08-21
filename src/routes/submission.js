@@ -107,22 +107,68 @@ submission.get("/totalSubmissions/:id", userAuth, async (req, res) => {
   }
 });
 
-submission.get("/submissionDetails/:id", async (req, res) => {
+submission.get("/recentSubmissions/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const getDetails = await Submission.findById(id).populate(
-      "problemId",
-      "title difficulty",
-    );
-    if (!getDetails) {
+
+    let page = Number(req.query.page) || 1;
+    let limit = Number(req.query.limit) || 10;
+
+    if (page < 1) page = 1;
+    if (limit < 1 || limit > 10) limit = 10;
+
+    const skip = (page - 1) * limit;
+
+    const totalSubmissions = await Submission.countDocuments({
+      userId: id,
+    });
+
+    const totalPages = Math.ceil(totalSubmissions / limit);
+
+    const submissions = await Submission.find({
+      userId: id,
+    })
+      .populate("problemId", "title difficulty")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      success: true,
+      submissions,
+      pagination: {
+        currentPage: page,
+        limit,
+        totalSubmissions,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch submissions",
+    });
+  }
+});
+
+submission.get("/submissionDetails/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const getSubmission = await Submission.findById(id);
+
+    if (!getSubmission)
       return res
         .status(404)
         .json({ success: false, message: "no submission found" });
-    }
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
-      message: "successfully fetched ",
-      submission: getDetails,
+      message: "succesfully fetched",
+      submission: getSubmission,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

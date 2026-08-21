@@ -252,7 +252,7 @@ const editValidateQuestion = ({
     );
     console.log(invalidDataStructure);
 
-    if (invalidDataStructure.length !== 0) {
+    if (invalidDataStructure.length == 0) {
       throw new Error("data structure type is not valid");
     }
   }

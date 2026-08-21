@@ -239,9 +239,7 @@ question.post(
 
 question.get("/problemOfTheDay", async (req, res) => {
   try {
-    const setting = await Setting.findOne().populate(
-      "problemOfDay",
-    );
+    const setting = await Setting.findOne().populate("problemOfDay");
     res.json({
       success: true,
       question: setting.problemOfDay,

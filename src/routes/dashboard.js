@@ -75,8 +75,6 @@ dashboard.get("/admin/getSubmissions", userAuth, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5);
 
-    console.log(getSubmissions);
-
     res.status(200).json({
       success: true,
       message: "Successfully fetched",
