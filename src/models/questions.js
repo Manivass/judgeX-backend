@@ -3,6 +3,11 @@ const { dataStructreTypes } = require("../constant");
 
 const questionsSchema = new mongoose.Schema(
   {
+    questionNumber: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
     title: {
       type: String,
       trim: true,
