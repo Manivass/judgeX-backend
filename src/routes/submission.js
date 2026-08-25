@@ -158,7 +158,10 @@ submission.get("/recentSubmissions/:id", async (req, res) => {
 submission.get("/submissionDetails/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const getSubmission = await Submission.findById(id);
+    const getSubmission = await Submission.findById(id).populate(
+      "problemId",
+      "title",
+    );
 
     if (!getSubmission)
       return res
