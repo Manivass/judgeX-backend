@@ -80,4 +80,14 @@ const unionTerritories = [
 
 const indianLoactions = [...indianStates, ...unionTerritories];
 
-module.exports = { dataStructreTypes, languageNumber, indianLoactions };
+const membershipAmount = {
+  silver: 199,
+  gold: 499,
+};
+
+module.exports = {
+  dataStructreTypes,
+  languageNumber,
+  indianLoactions,
+  membershipAmount,
+};
