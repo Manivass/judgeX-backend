@@ -21,18 +21,9 @@ app.use(
     credentials: true,
   }),
 );
-app.use(
-  express.json({
-    verify: (req, res, buf) => {
-      if (
-        req.originalUrl === "/payment/webhook" ||
-        req.originalUrl === "/api/payment/webhook"
-      ) {
-        req.rawBody = buf;
-      }
-    },
-  }),
-);
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
+
+app.use("/", express.json());
 app.use("/", cookieParser());
 app.use("/", user);
 app.use("/", code);

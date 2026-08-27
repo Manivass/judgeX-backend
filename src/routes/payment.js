@@ -54,10 +54,13 @@ payment.post("/payment/create", userAuth, async (req, res) => {
 
 payment.post("/payment/webhook", async (req, res) => {
   try {
+    console.log("🔥 WEBHOOK HIT");
+
     const webhookSignature = req.get("X-Razorpay-Signature");
+    const rawBody = req.body.toString();
 
     const isWebhookValid = validateWebhookSignature(
-      req.rawBody,
+      rawBody,
       webhookSignature,
       process.env.RAZORPAY_WEBHOOK_SECRET,
     );
@@ -68,44 +71,12 @@ payment.post("/payment/webhook", async (req, res) => {
       });
     }
 
-    const event = req.body.event;
+    const body = JSON.parse(rawBody);
 
-    const paymentDetails = req.body.payload.payment.entity;
+    const event = body.event;
+    const paymentDetails = body.payload.payment.entity;
 
-    const paymentRecord = await Payment.findOne({
-      orderId: paymentDetails.order_id,
-    });
-
-    if (!paymentRecord) {
-      return res.status(404).json({
-        msg: "Payment record not found",
-      });
-    }
-
-    // Update payment status
-    paymentRecord.status = paymentDetails.status;
-
-    await paymentRecord.save();
-
-    // Only activate membership after successful payment
-    if (event === "payment.captured") {
-      const user = await User.findById(paymentRecord.userId);
-
-      if (!user) {
-        return res.status(404).json({
-          msg: "User not found",
-        });
-      }
-
-      user.isPremium = true;
-      user.membershipType = paymentRecord.notes.membershipType.toLowerCase();
-
-      await user.save();
-
-      console.log(
-        `Premium activated for ${user.email} - ${user.membershipType}`,
-      );
-    }
+    // rest of your code...
 
     return res.status(200).json({
       msg: "Webhook received successfully",
