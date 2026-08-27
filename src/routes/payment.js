@@ -53,21 +53,16 @@ payment.post("/payment/create", userAuth, async (req, res) => {
 });
 
 payment.post("/payment/webhook", async (req, res) => {
-  console.log("🔥 WEBHOOK HIT");
+  console.log(" WEBHOOK HIT");
 
   try {
     const webhookSignature = req.get("X-Razorpay-Signature");
 
-    console.log("Signature:", webhookSignature ? "RECEIVED" : "MISSING");
-
     console.log(
       "Webhook Secret:",
-      process.env.RAZORPAY_WEBHOOK_SECRET ? "RECEIVED" : "MISSING",
-    );
-
-    console.log(
-      "Raw Body:",
-      Buffer.isBuffer(req.body) ? "RECEIVED" : "MISSING",
+      process.env.RAZORPAY_WEBHOOK_SECRET
+        ? process.env.RAZORPAY_WEBHOOK_SECRET
+        : "MISSING",
     );
 
     if (!webhookSignature) {
@@ -94,7 +89,8 @@ payment.post("/payment/webhook", async (req, res) => {
       process.env.RAZORPAY_WEBHOOK_SECRET,
     );
 
-    console.log("Signature Valid:", isWebhookValid);
+
+
 
     if (!isWebhookValid) {
       return res.status(400).json({
@@ -118,7 +114,6 @@ payment.post("/payment/webhook", async (req, res) => {
     });
 
     if (!paymentRecord) {
-      console.log("❌ Payment record not found");
 
       return res.status(404).json({
         msg: "Payment record not found",
@@ -129,8 +124,6 @@ payment.post("/payment/webhook", async (req, res) => {
     paymentRecord.status = paymentDetails.status;
 
     await paymentRecord.save();
-
-    console.log("✅ Payment status updated");
 
     // Activate membership
     if (event === "payment.captured") {
@@ -147,10 +140,6 @@ payment.post("/payment/webhook", async (req, res) => {
       user.membershipType = paymentRecord.notes.membershipType.toLowerCase();
 
       await user.save();
-
-      console.log("🎉 PREMIUM ACTIVATED");
-      console.log("User:", user.email);
-      console.log("Membership:", user.membershipType);
     }
 
     return res.status(200).json({
