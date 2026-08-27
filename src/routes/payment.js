@@ -56,82 +56,102 @@ payment.post("/payment/webhook", async (req, res) => {
   console.log("🔥 WEBHOOK HIT");
 
   try {
-    console.log("1️⃣ Headers received");
-
     const webhookSignature = req.get("X-Razorpay-Signature");
 
-    console.log("2️⃣ Signature:", webhookSignature ? "YES" : "NO");
-    console.log("3️⃣ Raw body exists:", !!req.rawBody);
-    console.log("4️⃣ Event:", req.body?.event);
+    console.log("Signature:", webhookSignature ? "RECEIVED" : "MISSING");
+
+    console.log(
+      "Webhook Secret:",
+      process.env.RAZORPAY_WEBHOOK_SECRET ? "RECEIVED" : "MISSING",
+    );
+
+    console.log(
+      "Raw Body:",
+      Buffer.isBuffer(req.body) ? "RECEIVED" : "MISSING",
+    );
+
+    if (!webhookSignature) {
+      return res.status(400).json({
+        msg: "Webhook signature missing",
+      });
+    }
+
+    if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+      return res.status(500).json({
+        msg: "Webhook secret missing in server",
+      });
+    }
+
+    if (!Buffer.isBuffer(req.body)) {
+      return res.status(400).json({
+        msg: "Raw webhook body missing",
+      });
+    }
 
     const isWebhookValid = validateWebhookSignature(
-      req.rawBody,
+      req.body,
       webhookSignature,
       process.env.RAZORPAY_WEBHOOK_SECRET,
     );
 
-    console.log("5️⃣ Signature valid:", isWebhookValid);
+    console.log("Signature Valid:", isWebhookValid);
 
     if (!isWebhookValid) {
-      console.log("❌ INVALID SIGNATURE");
-
       return res.status(400).json({
         msg: "Webhook signature is invalid",
       });
     }
 
-    const event = req.body.event;
+    // Convert raw Buffer → JSON
+    const body = JSON.parse(req.body.toString());
 
-    console.log("6️⃣ EVENT:", event);
+    console.log("Webhook Event:", body.event);
 
-    const paymentDetails = req.body.payload.payment.entity;
+    const event = body.event;
 
-    console.log("7️⃣ PAYMENT DETAILS:", paymentDetails);
+    const paymentDetails = body.payload.payment.entity;
+
+    console.log("Razorpay Order ID:", paymentDetails.order_id);
 
     const paymentRecord = await Payment.findOne({
       orderId: paymentDetails.order_id,
     });
 
-    console.log("8️⃣ PAYMENT RECORD:", paymentRecord);
-
     if (!paymentRecord) {
-      console.log("❌ PAYMENT RECORD NOT FOUND");
+      console.log("❌ Payment record not found");
 
       return res.status(404).json({
         msg: "Payment record not found",
       });
     }
 
+    // Update payment status
     paymentRecord.status = paymentDetails.status;
 
     await paymentRecord.save();
 
-    console.log("9️⃣ PAYMENT UPDATED");
+    console.log("✅ Payment status updated");
 
+    // Activate membership
     if (event === "payment.captured") {
       const user = await User.findById(paymentRecord.userId);
 
-      console.log("🔟 USER:", user);
-
       if (!user) {
-        console.log("❌ USER NOT FOUND");
-
         return res.status(404).json({
           msg: "User not found",
         });
       }
 
       user.isPremium = true;
+
       user.membershipType = paymentRecord.notes.membershipType.toLowerCase();
 
       await user.save();
 
       console.log("🎉 PREMIUM ACTIVATED");
-      console.log("USER:", user.email);
-      console.log("MEMBERSHIP:", user.membershipType);
+      console.log("User:", user.email);
+      console.log("Membership:", user.membershipType);
     }
-
-    console.log("✅ WEBHOOK SUCCESS");
 
     return res.status(200).json({
       success: true,
@@ -140,7 +160,6 @@ payment.post("/payment/webhook", async (req, res) => {
   } catch (err) {
     console.error("❌ WEBHOOK ERROR");
     console.error(err);
-    console.error(err.stack);
 
     return res.status(500).json({
       success: false,
