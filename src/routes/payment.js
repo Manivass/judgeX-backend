@@ -1,14 +1,25 @@
 const express = require("express");
-const userAuth = require("../middleware/userAuth");
 const instance = require("../utils/razorpay");
 const { membershipAmount } = require("../constant");
+const Payment = require("../models/payment");
+const userAuth = require("../middleware/userAuth");
+const {
+  validateWebhookSignature,
+} = require("razorpay/dist/utils/razorpay-utils");
+const User = require("../models/user");
 
 const payment = express.Router();
 
-paymentRouter.post("/payment/create", userAuth, async (req, res) => {
+payment.post("/payment/create", userAuth, async (req, res) => {
   try {
     const { membershipType } = req.body;
-    const { firstName, lastName, emailId } = req.user;
+    if (!["Silver", "Gold"].includes(membershipType)) {
+      return res.status(400).json({
+        msg: "Invalid membership type",
+      });
+    }
+
+    const { firstName, lastName, email } = req.user;
 
     const order = await instance.orders.create({
       amount: membershipAmount[membershipType] * 100,
@@ -17,12 +28,10 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
       notes: {
         firstName,
         lastName,
-        emailId,
+        email,
         membershipType: membershipType,
       },
     });
-
-    console.log(order);
 
     const payment = new Payment({
       userId: req.user._id,
@@ -37,9 +46,77 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     const savedPayment = await payment.save();
 
     // Return back my order details to frontend
-    res.json({ ...savedPayment.toJSON(), keyId: process.env.RAZORPAY_KEY_ID });
+    res.json({ ...savedPayment.toJSON(), key: process.env.RAZORPAY_KEY_ID });
   } catch (err) {
     return res.status(500).json({ msg: err.message });
+  }
+});
+
+payment.post("/payment/webhook", async (req, res) => {
+  try {
+    const webhookSignature = req.get("X-Razorpay-Signature");
+
+    const isWebhookValid = validateWebhookSignature(
+      JSON.stringify(req.body),
+      webhookSignature,
+      process.env.RAZORPAY_WEBHOOK_SECRET,
+    );
+
+    if (!isWebhookValid) {
+      return res.status(400).json({
+        msg: "Webhook signature is invalid",
+      });
+    }
+
+    const event = req.body.event;
+
+    const paymentDetails = req.body.payload.payment.entity;
+
+    const paymentRecord = await Payment.findOne({
+      orderId: paymentDetails.order_id,
+    });
+
+    if (!paymentRecord) {
+      return res.status(404).json({
+        msg: "Payment record not found",
+      });
+    }
+
+    // Update payment status
+    paymentRecord.status = paymentDetails.status;
+
+    await paymentRecord.save();
+
+    // Only activate membership after successful payment
+    if (event === "payment.captured") {
+      const user = await User.findById(paymentRecord.userId);
+
+      if (!user) {
+        return res.status(404).json({
+          msg: "User not found",
+        });
+      }
+
+      user.isPremium = true;
+      user.membershipType = paymentRecord.notes.membershipType;
+
+      await user.save();
+
+      console.log(
+        `Premium activated for ${user.email} - ${user.membershipType}`,
+      );
+    }
+
+    return res.status(200).json({
+      msg: "Webhook received successfully",
+    });
+  } catch (err) {
+    console.error("Webhook Error:", err);
+
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 });
 module.exports = payment;

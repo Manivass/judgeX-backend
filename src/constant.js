@@ -81,8 +81,8 @@ const unionTerritories = [
 const indianLoactions = [...indianStates, ...unionTerritories];
 
 const membershipAmount = {
-  silver: 199,
-  gold: 499,
+  Silver: 199,
+  Gold: 499,
 };
 
 module.exports = {

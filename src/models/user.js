@@ -248,6 +248,17 @@ const userSchema = new mongoose.Schema(
       },
       default: {},
     },
+    isPremium: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+      required: true,
+      enum: ["gold", "silver", null],
+      default: null,
+    },
   },
   {
     timestamps: true,

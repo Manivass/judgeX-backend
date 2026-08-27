@@ -9,6 +9,7 @@ const dashboard = require("./routes/dashboard.js");
 const submission = require("./routes/submission.js");
 const questionRequest = require("./routes/questionRequest.js");
 const editorial = require("./routes/editorial.js");
+const payment = require("./routes/payment.js");
 
 require("dotenv").config();
 require("./utils/cron.js");
@@ -29,6 +30,7 @@ app.use("/", dashboard);
 app.use("/", submission);
 app.use("/", questionRequest);
 app.use("/", editorial);
+app.use("/", payment);
 
 connectionDB()
   .then(() => {
