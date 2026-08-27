@@ -1,24 +1,29 @@
 const express = require("express");
 const Editorial = require("../models/editorial");
-const userAuth = require("../middlewares/userAuth");
+const userAuth = require("../middleware/userAuth");
 
 const editorial = express.Router();
 
 editorial.get("/geteditorial/:id", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
-    if (!loggedUser.premium) {
-      return res.status(403).json({
-        success: false,
-        message: "Only premium users can see the editorial",
-      });
-    }
+    // if (!loggedUser.premium) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "Only premium users can see the editorial",
+    //   });
+    // }
 
     const { id } = req.params;
+    console.log(id);
+    const editorials = await Editorial.find();
+
+    console.log(editorials);
 
     const editorialData = await Editorial.findOne({
-      questionId: id,
+      questionNumber: Number(id),
     });
+    console.log(editorialData);
 
     if (!editorialData) {
       return res.status(404).json({
@@ -26,6 +31,7 @@ editorial.get("/geteditorial/:id", userAuth, async (req, res) => {
         message: "No editorial found",
       });
     }
+    console.log(editorial);
 
     return res.status(200).json({
       success: true,

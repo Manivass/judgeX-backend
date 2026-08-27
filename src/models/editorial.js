@@ -8,13 +8,6 @@ const editorialSchema = new mongoose.Schema(
       unique: true,
     },
 
-    questionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Question",
-      required: true,
-      unique: true,
-    },
-
     bruteForce: {
       approach: {
         type: String,
@@ -55,6 +48,7 @@ const editorialSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: "editorial",
   },
 );
 
