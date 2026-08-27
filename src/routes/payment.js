@@ -57,7 +57,7 @@ payment.post("/payment/webhook", async (req, res) => {
     const webhookSignature = req.get("X-Razorpay-Signature");
 
     const isWebhookValid = validateWebhookSignature(
-      JSON.stringify(req.body),
+      req.rawBody,
       webhookSignature,
       process.env.RAZORPAY_WEBHOOK_SECRET,
     );
@@ -98,7 +98,7 @@ payment.post("/payment/webhook", async (req, res) => {
       }
 
       user.isPremium = true;
-      user.membershipType = paymentRecord.notes.membershipType;
+      user.membershipType = paymentRecord.notes.membershipType.toLowerCase();
 
       await user.save();
 
