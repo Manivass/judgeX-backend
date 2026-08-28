@@ -351,4 +351,92 @@ contest.get("/contest/my-contests", userAuth, async (req, res) => {
   }
 });
 
+contest.patch("/contest/:contestId/edit", userAuth, async (req, res) => {
+  try {
+    const { contestId } = req.params;
+
+    const {
+      title,
+      description,
+      startTime,
+      endTime,
+      duration,
+      problems,
+      maxParticipants,
+      isPublic,
+    } = req.body;
+
+    // 1. Check contest exists
+    const contest = await Contest.findById(contestId);
+
+    if (!contest) {
+      return res.status(404).json({
+        success: false,
+        message: "Contest not found",
+      });
+    }
+
+    // 2. Validate dates if provided
+    const start = startTime ? new Date(startTime) : contest.startTime;
+
+    const end = endTime ? new Date(endTime) : contest.endTime;
+
+    if (start >= end) {
+      return res.status(400).json({
+        success: false,
+        message: "End time must be after start time",
+      });
+    }
+
+    // 3. Validate problems if provided
+    if (problems) {
+      if (!Array.isArray(problems) || problems.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Problems must be a non-empty array",
+        });
+      }
+
+      const questionCount = await Question.countDocuments({
+        _id: { $in: problems },
+      });
+
+      if (questionCount !== problems.length) {
+        return res.status(400).json({
+          success: false,
+          message: "One or more questions are invalid",
+        });
+      }
+    }
+
+    // 4. Update only provided fields
+    if (title !== undefined) contest.title = title;
+    if (description !== undefined) contest.description = description;
+
+    if (startTime !== undefined) contest.startTime = start;
+
+    if (endTime !== undefined) contest.endTime = end;
+
+    if (duration !== undefined) contest.duration = duration;
+
+    if (problems !== undefined) contest.problems = problems;
+
+    if (maxParticipants !== undefined)
+      contest.maxParticipants = maxParticipants;
+
+    if (isPublic !== undefined) contest.isPublic = isPublic;
+
+    // 5. Save
+    await contest.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Contest updated successfully",
+      contest,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = contest;
