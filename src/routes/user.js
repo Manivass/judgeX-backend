@@ -188,7 +188,7 @@ user.get("/leaderboard", userAuth, async (req, res) => {
 
     const users = await User.find()
       .select(
-        "firstName lastName username email profilePicture solvedProblems isBlocked createdAt",
+        "firstName lastName username email profilePicture solvedProblems isBlocked createdAt isPremium",
       )
       .sort({
         "solvedProblems.total": -1,
