@@ -1,6 +1,7 @@
 const express = require("express");
 const Contest = require("../models/contest/contest");
 const userAuth = require("../middleware/userAuth");
+const ContestParticipant = require("../models/contest/participant");
 
 const contest = express.Router();
 
@@ -104,6 +105,87 @@ contest.get("/contest/getcontests", userAuth, async (req, res) => {
     return res.status(200).json({
       message: "Contests fetched successfully",
       contests,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+contest.get("/contest/:contestId", userAuth, async (req, res) => {
+  try {
+    const { contestId } = req.params;
+
+    const contest = await Contest.findById(contestId)
+      .populate("createdBy", "firstName lastName")
+      .populate("problems", "title difficulty");
+
+    if (!contest) {
+      return res.status(404).json({
+        message: "Contest not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Contest fetched successfully",
+      contest,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+contest.post("/contest/:contestId/register", userAuth, async (req, res) => {
+  try {
+    const { contestId } = req.params;
+    const userId = req.user._id;
+
+    // 1. Check contest exists
+    const contest = await Contest.findById(contestId);
+
+    if (!contest) {
+      return res.status(404).json({
+        message: "Contest not found",
+      });
+    }
+
+    // 2. Check contest is upcoming
+    if (contest.status !== "upcoming") {
+      return res.status(400).json({
+        message: "Registration is closed",
+      });
+    }
+
+    // 3. Check maximum participants
+    const participantCount = await ContestParticipant.countDocuments({
+      contestId,
+    });
+
+    if (participantCount >= contest.maxParticipants) {
+      return res.status(400).json({
+        message: "Contest is full",
+      });
+    }
+
+    // 4. Check already registered
+    const existingParticipant = await ContestParticipant.findOne({
+      contestId,
+      userId,
+    });
+
+    if (existingParticipant) {
+      return res.status(400).json({
+        message: "You are already registered for this contest",
+      });
+    }
+
+    // 5. Register user
+    const participant = await ContestParticipant.create({
+      contestId,
+      userId,
+    });
+
+    return res.status(201).json({
+      message: "Contest registered successfully",
+      participant,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
