@@ -255,9 +255,12 @@ const userSchema = new mongoose.Schema(
     },
     membershipType: {
       type: String,
-      required: true,
+      enum: ["gold", "silver"],
       default: null,
-      enum: ["gold", "silver", null],
+
+      required: function () {
+        return this.isPremium;
+      },
     },
   },
   {
