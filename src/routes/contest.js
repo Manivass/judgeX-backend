@@ -272,4 +272,68 @@ contest.post("/contest/:contestId/submit", userAuth, async (req, res) => {
     return res.status(400).json({ success: false, message: err.message });
   }
 });
+
+contest.post("/contest/:contestId/submissions", userAuth, async (req, res) => {
+  try {
+    const { contestId } = req.params;
+    const userId = req.user._id;
+
+    const submissions = await ContestSubmission.find({
+      contestId,
+      userId,
+    })
+      .populate("questionId", "title difficulty")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "Contest submissions fetched successfully",
+      submissions,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+contest.get("/contest/:contestId/leaderboard", userAuth, async (req, res) => {
+  try {
+    const { contestId } = req.params;
+
+    // 1. Check contest exists
+    const contest = await Contest.findById(contestId);
+
+    if (!contest) {
+      return res.status(404).json({
+        message: "Contest not found",
+      });
+    }
+
+    // 2. Get participants
+    const leaderboard = await ContestParticipant.find({
+      contestId,
+    })
+      .populate("userId", "firstName lastName")
+      .sort({
+        score: -1,
+        solvedCount: -1,
+        penalty: 1,
+      });
+
+    // 3. Assign rank
+    const rankedLeaderboard = leaderboard.map((participant, index) => ({
+      rank: index + 1,
+      user: participant.userId,
+      score: participant.score,
+      solvedCount: participant.solvedCount,
+      penalty: participant.penalty,
+    }));
+
+    return res.status(200).json({
+      message: "Leaderboard fetched successfully",
+      leaderboard: rankedLeaderboard,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = contest;
