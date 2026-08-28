@@ -256,8 +256,8 @@ const userSchema = new mongoose.Schema(
     membershipType: {
       type: String,
       required: true,
-      enum: ["gold", "silver", null],
       default: null,
+      enum: ["gold", "silver", null],
     },
   },
   {
