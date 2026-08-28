@@ -336,4 +336,19 @@ contest.get("/contest/:contestId/leaderboard", userAuth, async (req, res) => {
   }
 });
 
+contest.get("/contest/my-contests", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    const getContests = await ContestParticipant.find({ userId: user._id });
+    if (getContests.length == 0) {
+      return res
+        .status(404)
+        .json({ success: true, message: "no contest found" });
+    }
+    return res.status(200).json({ success: true, contests: getContests });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = contest;
