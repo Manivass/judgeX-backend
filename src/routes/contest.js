@@ -2,6 +2,7 @@ const express = require("express");
 const Contest = require("../models/contest/contest");
 const userAuth = require("../middleware/userAuth");
 const ContestParticipant = require("../models/contest/participant");
+const { default: axios } = require("axios");
 
 const contest = express.Router();
 
@@ -353,6 +354,10 @@ contest.get("/contest/my-contests", userAuth, async (req, res) => {
 
 contest.patch("/contest/:contestId/edit", userAuth, async (req, res) => {
   try {
+    if (req.user.role !== "admin")
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can access the page" });
     const { contestId } = req.params;
 
     const {
@@ -434,6 +439,73 @@ contest.patch("/contest/:contestId/edit", userAuth, async (req, res) => {
       message: "Contest updated successfully",
       contest,
     });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+contest.delete("/contest/:contestId/delete", userAuth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin")
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can access the page" });
+    const { contestId } = req.params;
+    const contest = await Contest.findById(contestId);
+
+    if (!contest) {
+      return res.status(404).json({
+        success: false,
+        message: "Contest not found",
+      });
+    }
+
+    // 2. Don't allow deleting live contest
+    if (contest.status === "live") {
+      return res.status(400).json({
+        success: false,
+        message: "Live contest cannot be deleted",
+      });
+    }
+
+    // 3. Don't allow deleting ended contest
+    if (contest.status === "ended") {
+      return res.status(400).json({
+        success: false,
+        message: "Ended contest cannot be deleted",
+      });
+    }
+
+    // 4. Delete contest
+    await Contest.findByIdAndDelete(contestId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Contest deleted successfully",
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+contest.get("/contest/:contestId/participants", userAuth, async (req, res) => {
+  try {
+    if (req.user.role !== "admin")
+      return res
+        .status(403)
+        .json({ success: false, message: "only admin can access the page" });
+    const { contestId } = req.params;
+    const contest = await Contest.findById(contestId);
+    if (!contest)
+      return res
+        .status(404)
+        .json({ success: false, message: "no contest found" });
+    const contestParticipant = await ContestParticipant.find({ contestId });
+    if (contestParticipant.length == 0)
+      return res
+        .status(404)
+        .json({ success: false, message: "no participant found" });
+    res.status(200).json({ success: true, participants: contestParticipant });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
