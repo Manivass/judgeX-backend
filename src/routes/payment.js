@@ -89,9 +89,6 @@ payment.post("/payment/webhook", async (req, res) => {
       process.env.RAZORPAY_WEBHOOK_SECRET,
     );
 
-
-
-
     if (!isWebhookValid) {
       return res.status(400).json({
         msg: "Webhook signature is invalid",
@@ -114,7 +111,6 @@ payment.post("/payment/webhook", async (req, res) => {
     });
 
     if (!paymentRecord) {
-
       return res.status(404).json({
         msg: "Payment record not found",
       });
@@ -154,6 +150,18 @@ payment.post("/payment/webhook", async (req, res) => {
       success: false,
       message: err.message,
     });
+  }
+});
+
+payment.get("/payment/verify", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    if (loggedUser.isPremium) {
+      return res.status(200).json({ success: false, isPremium: true });
+    }
+    res.status(200).json({ success: false, isPremium: false });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 module.exports = payment;
