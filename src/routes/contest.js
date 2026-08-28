@@ -192,4 +192,84 @@ contest.post("/contest/:contestId/register", userAuth, async (req, res) => {
   }
 });
 
+contest.post("/contest/:contestId/submit", userAuth, async (req, res) => {
+  try {
+    const { contestId } = req.params;
+    const { questionId, code, language } = req.body;
+
+    const userId = req.user._id;
+
+    // 1. Validate request
+    if (!questionId || !code || !language) {
+      return res.status(400).json({
+        message: "Question, code and language are required",
+      });
+    }
+
+    // 2. Check contest exists
+    const contest = await Contest.findById(contestId);
+
+    if (!contest) {
+      return res.status(404).json({
+        message: "Contest not found",
+      });
+    }
+
+    // 3. Check contest is live
+    const now = new Date();
+
+    if (now < contest.startTime) {
+      return res.status(400).json({
+        message: "Contest has not started yet",
+      });
+    }
+
+    if (now > contest.endTime) {
+      return res.status(400).json({
+        message: "Contest has ended",
+      });
+    }
+
+    // 4. Check user registered
+    const participant = await ContestParticipant.findOne({
+      contestId,
+      userId,
+    });
+
+    if (!participant) {
+      return res.status(403).json({
+        message: "You are not registered for this contest",
+      });
+    }
+
+    // 5. Check question belongs to contest
+    const isQuestionInContest = contest.problems.some(
+      (problem) => problem.toString() === questionId,
+    );
+
+    if (!isQuestionInContest) {
+      return res.status(400).json({
+        message: "This question does not belong to the contest",
+      });
+    }
+
+    // 6. Create submission
+    const submission = await ContestSubmission.create({
+      contestId,
+      userId,
+      questionId,
+      code,
+      language,
+      status: "pending",
+      score: 0,
+    });
+
+    return res.status(201).json({
+      message: "Code submitted successfully",
+      submission,
+    });
+  } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+});
 module.exports = contest;
