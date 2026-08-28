@@ -1,5 +1,6 @@
 const express = require("express");
 const Contest = require("../models/contest/contest");
+const userAuth = require("../middleware/userAuth");
 
 const contest = express.Router();
 
@@ -92,3 +93,21 @@ contest.post("/contest/create", userAuth, async (req, res) => {
     res.status(400).json({ success: false, message: err.message });
   }
 });
+
+contest.get("/contest/getcontests", userAuth, async (req, res) => {
+  try {
+    const contests = await Contest.find()
+      .populate("createdBy", "firstName lastName")
+      .populate("problems", "title difficulty")
+      .sort({ startTime: 1 });
+
+    return res.status(200).json({
+      message: "Contests fetched successfully",
+      contests,
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+module.exports = contest;
