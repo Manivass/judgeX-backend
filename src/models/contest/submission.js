@@ -50,4 +50,8 @@ const contestSubmissionSchema = new mongoose.Schema(
   },
 );
 
-module.exports = mongoose.model("ContestSubmission", contestSubmissionSchema);
+const ContestSubmission = new mongoose.Model(
+  "ContestSubmission",
+  contestSubmissionSchema,
+);
+module.exports = ContestSubmission;
