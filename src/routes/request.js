@@ -22,7 +22,7 @@ request.post("/request/send/:toUserId", userAuth, async (req, res) => {
       ],
     });
 
-    if (isConnectionAlreadySend.length == 0)
+    if (isConnectionAlreadySend.length !== 0)
       return res
         .status(403)
         .json({ success: false, message: "request already send" });
@@ -70,7 +70,24 @@ request.post("/request/review/:status/:reqId", userAuth, async (req, res) => {
   }
 });
 
-request.get("/request/:toUserId", userAuth, async (req, res) => {
+request.post("/request/getRequest", userAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const request = await ConnectionRequest.find({
+      toUserId: userId,
+      status: "interested",
+    });
+    if (request.length == 0)
+      return res
+        .status(404)
+        .json({ success: false, message: "no request found" });
+    res.status(200).json({ success: true, requests: request });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+request.get("/request/getConnection/:toUserId", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
     const { toUserId } = req.params;
@@ -79,7 +96,7 @@ request.get("/request/:toUserId", userAuth, async (req, res) => {
       toUserId,
     });
     if (!getConnectionAvailable) {
-      return res.status(404).json({ success: false, status: "null" });
+      return res.status(200).json({ success: false, status: "null" });
     }
     return res
       .status(200)
