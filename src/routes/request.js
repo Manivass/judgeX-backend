@@ -70,4 +70,23 @@ request.post("/request/review/:status/:reqId", userAuth, async (req, res) => {
   }
 });
 
+request.get("/request/:toUserId", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    const { toUserId } = req.params;
+    const getConnectionAvailable = await ConnectionRequest.findOne({
+      fromUserId: loggedUser._id,
+      toUserId,
+    });
+    if (!getConnectionAvailable) {
+      return res.status(404).json({ success: false, status: "null" });
+    }
+    return res
+      .status(200)
+      .json({ success: true, status: getConnectionAvailable.status });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = request;

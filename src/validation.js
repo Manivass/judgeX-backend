@@ -82,7 +82,7 @@ const validateProfile = ({
     throw new Error("instagram  URL is not valid");
   }
 
-  if (phoneNumber && !validator.isMobilePhone(phoneNumber)) {
+  if (phoneNumber !== "" && !validator.isMobilePhone(phoneNumber)) {
     throw new Error("phone number is not valid");
   }
 
