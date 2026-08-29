@@ -259,4 +259,5 @@ user.get("/heatmap", userAuth, async (req, res) => {
   }
 });
 
+
 module.exports = user;
