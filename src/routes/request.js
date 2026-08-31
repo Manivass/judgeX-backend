@@ -52,6 +52,7 @@ request.post("/request/review/:status/:reqId", userAuth, async (req, res) => {
     if (!allowedStatus.includes(status)) {
       return res.status(400).send(status + " is not valid status");
     }
+
     const connectionAvailable = await ConnectionRequest.findOne({
       _id: reqId,
       toUserId: loggedUser._id,
@@ -62,28 +63,30 @@ request.post("/request/review/:status/:reqId", userAuth, async (req, res) => {
     }
     connectionAvailable.status = status;
     await connectionAvailable.save();
-    res
-      .status(200)
-      .json({ success: false, message: status + " successfully " });
+    res.status(200).json({ success: true, message: status + " successfully " });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
 });
 
-request.post("/request/getRequest", userAuth, async (req, res) => {
+request.get("/request/getRequest", userAuth, async (req, res) => {
   try {
     const userId = req.user._id;
-    const request = await ConnectionRequest.find({
+
+    const requests = await ConnectionRequest.find({
       toUserId: userId,
       status: "interested",
+    }).populate("fromUserId", "firstName lastName photoUrl about");
+
+    return res.status(200).json({
+      success: true,
+      requests,
     });
-    if (request.length == 0)
-      return res
-        .status(404)
-        .json({ success: false, message: "no request found" });
-    res.status(200).json({ success: true, requests: request });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    return res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 });
 
@@ -92,8 +95,16 @@ request.get("/request/getConnection/:toUserId", userAuth, async (req, res) => {
     const loggedUser = req.user;
     const { toUserId } = req.params;
     const getConnectionAvailable = await ConnectionRequest.findOne({
-      fromUserId: loggedUser._id,
-      toUserId,
+      $or: [
+        {
+          fromUserId: loggedUser._id,
+          toUserId,
+        },
+        {
+          fromUserId: toUserId,
+          toUserId: loggedUser._id,
+        },
+      ],
     });
     if (!getConnectionAvailable) {
       return res.status(200).json({ success: false, status: "null" });

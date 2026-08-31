@@ -11,10 +11,15 @@ const questionRequest = require("./routes/questionRequest.js");
 const editorial = require("./routes/editorial.js");
 const payment = require("./routes/payment.js");
 const request = require("./routes/request.js");
+const http = require("http");
+const initializeSocket = require("./utils/socket.js");
 
 require("dotenv").config();
 require("./utils/cron.js");
 const app = express();
+
+const server = http.createServer(app);
+initializeSocket(server);
 
 app.use(
   cors({
@@ -44,7 +49,7 @@ app.use("/", request);
 connectionDB()
   .then(() => {
     console.log("database is successfully connected to server");
-    app.listen(7777, () => {
+    server.listen(7777, () => {
       console.log("app is successfully connected");
     });
   })

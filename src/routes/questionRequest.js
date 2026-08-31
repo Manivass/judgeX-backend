@@ -185,7 +185,7 @@ questionRequest.get("/getRequests", userAuth, async (req, res) => {
   }
 });
 
-questionRequest.get("/request/:id", userAuth, async (req, res) => {
+questionRequest.get("/question/request/:id", userAuth, async (req, res) => {
   try {
     const loggedUser = req.user;
 
