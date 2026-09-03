@@ -7,6 +7,7 @@ const user = express.Router();
 const { OAuth2Client } = require("google-auth-library");
 const { indianStates, indianLoactions } = require("../constant");
 const Submission = require("../models/submission");
+const ConnectionRequest = require("../models/connectionRequest");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -259,5 +260,22 @@ user.get("/heatmap", userAuth, async (req, res) => {
   }
 });
 
+user.get("/getConnections", userAuth, async (req, res) => {
+  try {
+    const loggedUser = req.user;
+    const connections = await ConnectionRequest.find({
+      $or: [
+        { fromUserId: loggedUser._id, status: "accepted" },
+        { toUserId: loggedUser._id, status: "accepted" },
+      ],
+    })
+      .populate("toUserId", "firstName lastName email photoURL")
+      .populate("fromUserId", "firstName lastName email photoURL");
+
+    return res.status(200).json({ success: true, connections });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
 
 module.exports = user;

@@ -3,7 +3,7 @@ const Question = require("../models/questions");
 const Setting = require("../models/settings");
 
 cron.schedule(
-  "* * * * *",
+  "0 0 * * *",
   async () => {
     const count = await Question.countDocuments();
     const random = Math.floor(Math.random() * count);

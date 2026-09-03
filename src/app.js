@@ -13,6 +13,7 @@ const payment = require("./routes/payment.js");
 const request = require("./routes/request.js");
 const http = require("http");
 const initializeSocket = require("./utils/socket.js");
+const chat = require("./routes/chat.js");
 
 require("dotenv").config();
 require("./utils/cron.js");
@@ -45,6 +46,7 @@ app.use("/", questionRequest);
 app.use("/", editorial);
 app.use("/", payment);
 app.use("/", request);
+app.use("/", chat);
 
 connectionDB()
   .then(() => {

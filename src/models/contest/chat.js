@@ -8,6 +8,10 @@ const messageSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    userName: {
+      type: String,
+      required: true,
+    },
     text: {
       type: String,
       trim: true,

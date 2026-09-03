@@ -10,7 +10,10 @@ request.post("/request/send/:toUserId", userAuth, async (req, res) => {
     const loggedUser = req.user;
     const { toUserId } = req.params;
     const fromUserId = loggedUser._id;
+    console.log(fromUserId + " " + toUserId);
+
     const isToUserAvailable = await User.findById(toUserId);
+    
     if (!isToUserAvailable) {
       return res.status(404).json({ success: false, message: "no user found" });
     }
@@ -21,6 +24,8 @@ request.post("/request/send/:toUserId", userAuth, async (req, res) => {
         { fromUserId: toUserId, toUserId: fromUserId },
       ],
     });
+
+    console.log(fromUserId + "  " + toUserId);
 
     if (isConnectionAlreadySend.length !== 0)
       return res
@@ -78,11 +83,15 @@ request.get("/request/getRequest", userAuth, async (req, res) => {
       status: "interested",
     }).populate("fromUserId", "firstName lastName photoUrl about");
 
+    console.log("Requests:", requests);
+
     return res.status(200).json({
       success: true,
       requests,
     });
   } catch (err) {
+    console.log(err);
+
     return res.status(400).json({
       success: false,
       message: err.message,
@@ -109,6 +118,7 @@ request.get("/request/getConnection/:toUserId", userAuth, async (req, res) => {
     if (!getConnectionAvailable) {
       return res.status(200).json({ success: false, status: "null" });
     }
+    console.log(getConnectionAvailable.status);
     return res
       .status(200)
       .json({ success: true, status: getConnectionAvailable.status });
