@@ -35,14 +35,14 @@ user.post("/login", async (req, res) => {
 
     const token = await isEmailAvailable.getJWT();
 
-    const getToken = res.cookie("token", token, {
+    res.cookie("token", token, {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
     res.status(200).json({
       success: true,
       message: "successfully logged in",
       user: isEmailAvailable,
-      token: getToken,
+      token,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -67,7 +67,7 @@ user.post("/signup", async (req, res) => {
 
     const token = await newUser.getJWT();
 
-    const getToken = res.cookie("token", token, {
+    res.cookie("token", token, {
       expires: new Date(Date.now() + 100 * 60 * 60 * 24),
     });
 
@@ -75,7 +75,7 @@ user.post("/signup", async (req, res) => {
       success: true,
       message: "successfully signed up",
       user: newUser,
-      token: getToken,
+      token,
     });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
@@ -108,14 +108,14 @@ user.post("/google-login", async (req, res) => {
     }
     const jwtToken = await isUserAvailable.getJWT();
 
-    const getToken = res.cookie("token", jwtToken, {
+    res.cookie("token", jwtToken, {
       httpOnly: true,
       expires: new Date(Date.now() + 60 * 60 * 1000 * 24),
     });
 
     res
       .status(200)
-      .json({ success: true, user: isUserAvailable, token: getToken });
+      .json({ success: true, user: isUserAvailable, token: jwtToken });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
